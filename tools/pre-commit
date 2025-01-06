@@ -1,0 +1,25 @@
+#!/bin/sh
+echo "Executing Tests"
+
+git stash -q --keep-index
+
+make -C build all
+
+if [ $? -ne 0 ]; then
+	echo "Build need you to make lsp so build rules are done."
+	git stash pop -q
+	exit 1
+fi
+
+ctest --test-dir build
+
+TEST_RESULT=$?
+
+git stash pop -q
+
+if [ $TEST_RESULT -ne 0 ]; then
+	echo "Failed tests. Commit aborted."
+	exit 1
+fi
+
+exit 0
