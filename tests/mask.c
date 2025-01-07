@@ -11,10 +11,10 @@ struct MaskTestFixture {
 UTEST_MAIN()
 
 UTEST_F_SETUP(MaskTestFixture) {
-	memset(&utest_fixture, 0, sizeof(struct MaskTestFixture));
+	memset(utest_fixture, 0, sizeof(struct MaskTestFixture));
 	uint64_t hdr = 0;
 
-	ASSERT_EQ(memcmp(&hdr, &utest_fixture, sizeof(struct MaskTestFixture)), 0);
+	ASSERT_EQ(memcmp(&hdr, utest_fixture, sizeof(struct MaskTestFixture)), 0);
 }
 
 UTEST_F(MaskTestFixture, mask_is_set_is_false) {
@@ -25,10 +25,12 @@ UTEST_F(MaskTestFixture, mask_is_set_is_false) {
 	ASSERT_FALSE(mask_is_set(&utest_fixture->header, PREV_IN_USE));
 }
 
+#define TEST_MASK MASK(0x02)
+
 UTEST_F(MaskTestFixture, multiple_mask_can_be_set) {
 	ASSERT_FALSE(mask_is_set(&utest_fixture->header, PREV_IN_USE));
 	toggle_mask(&utest_fixture->header, PREV_IN_USE);
-	ASSERT_FALSE(mask_is_set(&utest_fixture->header, MMAPED));
+	ASSERT_FALSE(mask_is_set(&utest_fixture->header, TEST_MASK));
 	ASSERT_TRUE(mask_is_set(&utest_fixture->header, PREV_IN_USE));
 	toggle_mask(&utest_fixture->header, PREV_IN_USE);
 	ASSERT_FALSE(mask_is_set(&utest_fixture->header, PREV_IN_USE));
