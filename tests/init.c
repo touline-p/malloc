@@ -10,3 +10,7 @@ UTEST(arena_init, init_pre_main) {
 	int * ptr = arena_g.top;
 	*ptr = 5;
 }
+
+UTEST(arena_init, top_alloc_is_done_at_init) {
+	ASSERT_EQ(arena_g.nb_alloc, 1);
+}
