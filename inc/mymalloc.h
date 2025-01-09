@@ -5,6 +5,26 @@
 # include <stdbool.h>
 # include <stdint.h>
 
+# define ZONE_NUMBER 3
+
+enum zone_e {
+	TINY = 0,
+	MEDIUM = 1,
+	LARGE = 2
+};
+
+# define FONCTIONAL_NUMBER 18
+
+enum zone_function_e {
+	COMPARAISON = 0,
+	TOP = 1,
+	FREED = 2,
+	FAST_ALLOC_PTR = 3,
+	SIZE_MAX_ALLOC = 4,
+	MESSAGE = 5,
+};
+
+# define COMP_CAST(x) ((bool (*) (uint64_t))(x))
 
 # define MASK(x) x ## 00000000000000
 
@@ -16,10 +36,12 @@
 # define FIRST_IN_ZONE MASK(0x04)
 
 # define LITTLE_TINY 16
+# define BIGGEST_MEDIUM 4080
 
-# define IS_TINY(x) x <= TINY_SIZE
-# define TINY_SIZE 16
-# define TINY_TEST_SIZE TINY_SIZE - 4
+# define IS_TINY(x) x <= BIGGEST_TINY
+# define IS_MEDIUM(x) x <= BIGGEST_MEDIUM
+# define BIGGEST_TINY 16
+# define TINY_TEST_SIZE BIGGEST_TINY - 4
 # define TINIEST_TINY_SIZE LITTLE_TINY + SIZE_CHUNK_HEADER
 
 # define MAX_PAGE 20
@@ -80,7 +102,9 @@ typedef struct arena_s {
 	void *tiny;
 	void *free_tiny;
 	void *medium;
+	void *free_medium;
 	void *big;
+	void *free_big;
 } arena_t;
 
 typedef struct page_s {

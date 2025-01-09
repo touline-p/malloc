@@ -2,7 +2,10 @@
 #include "mymalloc.h"
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
+
+#include "resetMalloc.h"
 
 struct MaskTestFixture {
 	uint64_t header;	
@@ -39,7 +42,7 @@ UTEST_F(MaskTestFixture, multiple_mask_can_be_set) {
 UTEST_F_TEARDOWN(MaskTestFixture) {
 }
 
-UTEST(mask, tiny_top_is_not_in_use) {
+UTEST_F(resetMalloc, tiny_top_is_not_in_use) {
 	char *str = mymalloc(TINY_TEST_SIZE);
 	chunk_info_t info = *(chunk_info_t *)arena_g.tiny;
 
@@ -47,8 +50,9 @@ UTEST(mask, tiny_top_is_not_in_use) {
 	ASSERT_FALSE(mask_is_set(&info, CHUNK_IN_USE));
 }
 
-UTEST(mask, allocated_chunk_is_in_use) {
+UTEST_F(resetMalloc, allocated_chunk_is_in_use) {
 	chunk_info_t *malloced = mymalloc(TINY_TEST_SIZE);
+	dprintf(2, "%p\n", malloced);
 
 	malloced = get_header_from_addr(malloced);
 	ASSERT_TRUE(mask_is_set(malloced, CHUNK_IN_USE));

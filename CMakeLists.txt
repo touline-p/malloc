@@ -14,7 +14,7 @@ set (INC inc)
 add_library(mymalloc SHARED ${SOURCES})
 
 target_include_directories(mymalloc PUBLIC ${INC})
-
+target_compile_options(mymalloc PRIVATE -g3)
 #---------------------------------------------------------------------------------------#
 
 include(build/tests_sources.cmake)

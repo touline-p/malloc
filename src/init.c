@@ -22,6 +22,7 @@ void init_malloc(void) {
 	memset(&arena_g, 0, sizeof(arena_t));
 	allocated_page = 0;
 	fast_alloc = 0;
+	arena_g.free_tiny = NULL;
 	chunk_info_t *top = NULL;
 }
 

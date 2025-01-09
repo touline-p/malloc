@@ -20,7 +20,7 @@ UTEST_F(resetMalloc, malloc_return_readable_and_writable) {
 }
 
 UTEST_F(resetMalloc, try_init_page_init_to_a_hundred_alloc_size) {
-	try_init_page((void **)&arena_g.tiny, TINY_SIZE);
+	try_init_page((void **)&arena_g.tiny, BIGGEST_TINY);
 }
 
 bool is_memset_to(char *ptr, char payload, size_t size) { 
@@ -35,14 +35,13 @@ bool is_memset_to(char *ptr, char payload, size_t size) {
 }
 
 UTEST_F(resetMalloc, one_hundred_allocation_fit_in_a_page) {
-	size_t size = TINY_SIZE;
+	size_t size = BIGGEST_TINY;
 	size_t arrlen = 100;
 	char *allocations[arrlen]; 
 
 	ASSERT_EQ(allocated_page, 0);
 
 	for ( int index = 0 ; index < arrlen ; index ++ ) {
-		dprintf(2, "%ld\n", index);
 		allocations[index] = mymalloc(size);
 		memset(allocations[index], index, size);
 		
@@ -55,7 +54,7 @@ UTEST_F(resetMalloc, one_hundred_allocation_fit_in_a_page) {
 }
 
 UTEST_F(resetMalloc, one_hundred_and_one_allocation_fit_in_a_page) {
-	size_t size = TINY_SIZE;
+	size_t size = BIGGEST_TINY;
 	size_t arrlen = 101;
 	char *allocations[arrlen]; 
 
@@ -72,7 +71,7 @@ UTEST_F(resetMalloc, one_hundred_and_one_allocation_fit_in_a_page) {
 }
 
 UTEST_F(resetMalloc, two_hundred_and_one_allocation_fit_in_a_page) {
-	size_t size = TINY_SIZE;
+	size_t size = BIGGEST_TINY;
 	size_t arrlen = 201;
 	char *allocations[arrlen]; 
 

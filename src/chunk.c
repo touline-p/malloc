@@ -31,5 +31,6 @@ void stock_and_reinit(void **to_stock, void **to_init, size_t size) {
 	if (*to_stock == NULL) {
 		*to_stock = *to_init;
 	}
+
 	try_init_page(to_init, size);
 }

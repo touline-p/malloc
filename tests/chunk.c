@@ -7,7 +7,7 @@
 UTEST_MAIN();
 
 UTEST(chunk, malloc_chunk_is_set_for_tiny) {
-	uint64_t sizes[] = {5, 8, 10, 15};
+	uint64_t sizes[] = {5, 8, 10, 15, 32};
 
 	for (int index = 0 ; index < 5 ; index ++ ) {
 
