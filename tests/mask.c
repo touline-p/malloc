@@ -39,14 +39,16 @@ UTEST_F(MaskTestFixture, multiple_mask_can_be_set) {
 UTEST_F_TEARDOWN(MaskTestFixture) {
 }
 
-UTEST(mask, top_is_not_in_use) {
-	chunk_info_t *info = arena_g.top;
+UTEST(mask, tiny_top_is_not_in_use) {
+	char *str = mymalloc(TINY_TEST_SIZE);
+	chunk_info_t info = *(chunk_info_t *)arena_g.tiny;
 
-	ASSERT_FALSE(mask_is_set(info, CHUNK_IN_USE));
+	myfree(str);
+	ASSERT_FALSE(mask_is_set(&info, CHUNK_IN_USE));
 }
 
 UTEST(mask, allocated_chunk_is_in_use) {
-	chunk_info_t *malloced = mymalloc(12);
+	chunk_info_t *malloced = mymalloc(TINY_TEST_SIZE);
 
 	malloced = get_header_from_addr(malloced);
 	ASSERT_TRUE(mask_is_set(malloced, CHUNK_IN_USE));

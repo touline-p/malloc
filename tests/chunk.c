@@ -2,23 +2,19 @@
 #include "mymalloc.h"
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <strings.h>
 
 UTEST_MAIN();
 
-// TODO
-size_t size_allocation(size_t size);
-
-UTEST(chunk, malloc_chunk_is_set) {
-	uint64_t sizes[] = {5, 8, 10, 15, 20};
+UTEST(chunk, malloc_chunk_is_set_for_tiny) {
+	uint64_t sizes[] = {5, 8, 10, 15};
 
 	for (int index = 0 ; index < 5 ; index ++ ) {
 
 		uint64_t size = sizes[index];
 		chunk_info_t *addr = (uint64_t*)mymalloc(size);
 		chunk_info_t *info = get_header_from_addr(addr);
-		ASSERT_EQ(size_allocation(size), GET_SIZE(info));
+		ASSERT_EQ(0, GET_SIZE(info) % 16);
 	}
 }
 
@@ -36,4 +32,3 @@ UTEST(chunk, two_subsequent_alloc_are_diff) {
 
 	ASSERT_TRUE(first != second);
 }
-

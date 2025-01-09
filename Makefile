@@ -30,7 +30,7 @@ $(TEST_DIR):
 
 
 $(CMAKEFILE): build/lib_sources.cmake build/tests_sources.cmake
-	cmake -B $(BUILD_DIR)
+	cmake -B $(BUILD_DIR) -DDEBUG=ON
 
 .PHONY: bld
 
@@ -50,6 +50,7 @@ lsp: update-sources
 
 run-test: all
 	ctest --test-dir build
+
 
 install-tools:
 	./tools/pre-commit-tester-installer.sh
