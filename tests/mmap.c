@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "resetMalloc.h"
+#include "testUtils.h"
 
 UTEST_MAIN()
 
@@ -21,17 +22,6 @@ UTEST_F(resetMalloc, malloc_return_readable_and_writable) {
 
 UTEST_F(resetMalloc, try_init_page_init_to_a_hundred_alloc_size) {
 	try_init_page((void **)&arena_g.tiny, BIGGEST_TINY);
-}
-
-bool is_memset_to(char *ptr, char payload, size_t size) { 
-	size_t index = 0;
-
-	while (index < size) {
-		if (ptr[index] != payload)
-			return false;
-		++index;
-	}
-	return true;
 }
 
 UTEST_F(resetMalloc, one_hundred_allocation_fit_in_a_page) {

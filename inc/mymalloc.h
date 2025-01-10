@@ -10,7 +10,8 @@
 enum zone_e {
 	TINY = 0,
 	MEDIUM = 1,
-	LARGE = 2
+	LARGE = 2,
+	ENDING_ZONE = 3
 };
 
 # define FONCTIONAL_NUMBER 18
@@ -22,9 +23,11 @@ enum zone_function_e {
 	FAST_ALLOC_PTR = 3,
 	SIZE_MAX_ALLOC = 4,
 	MESSAGE = 5,
+	ALLOCATION_FN = 6,
 };
 
 # define COMP_CAST(x) ((bool (*) (uint64_t))(x))
+# define ALLOC_CAST(x) ((int (*) (void **, size_t))(x))
 
 # define MASK(x) x ## 00000000000000
 
@@ -43,6 +46,8 @@ enum zone_function_e {
 # define BIGGEST_TINY 16
 # define TINY_TEST_SIZE BIGGEST_TINY - 4
 # define TINIEST_TINY_SIZE LITTLE_TINY + SIZE_CHUNK_HEADER
+# define MEDIUM_TEST_SIZE 3000
+# define LARGE_TEST_SIZE 16000
 
 # define MAX_PAGE 20
 
@@ -118,6 +123,8 @@ typedef struct page_s {
 #define INV_SIZE_MASK ~0xffffffffff
 #define ASSIGN_SIZE(to_assign, assignee) *to_assign &= INV_SIZE_MASK; *to_assign |= (*assignee & SIZE_MASK)
 #define GET_SIZE(to_get) (*(chunk_info_t *)to_get & SIZE_MASK)
+#define GET_USE_SIZE(to_get) (((chunk_info_t *)to_get)[1] & SIZE_MASK)
+#define SET_USE_SIZE(to_set, size) (((chunk_info_t *)to_set)[1] = size)
 
 #define NEXT_FREED_CHUNK(x) ((freed_chunk_t *)x)->next
 
