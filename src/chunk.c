@@ -24,6 +24,7 @@ uint64_t *get_addr_from_header(uint64_t *addr) {
 
 void *mmap_call(void *proximity, size_t length) {
 	void *addr = mmap(proximity, length, PROT_WRITE | PROT_READ, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+	printf("ptr allocated : %p\n", addr);
 	pages[allocated_page].addr = addr;
 	pages[allocated_page].size = length;
 	allocated_page += 1;

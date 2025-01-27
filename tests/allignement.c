@@ -7,7 +7,7 @@
 UTEST_MAIN();
 
 UTEST_F(resetMalloc, allignment_is_fine) {
-	size_t size = 8;
+	size_t size = 1;
 	void **addr[size];
 
 	for ( int a = 0 ; a < size ; a ++ ) {

@@ -17,11 +17,13 @@
 # define SIZE_CHUNK_HEADER sizeof(uint64_t) * OFFSET_HEADER
 
 # define IS_TINY(x) x <= BIGGEST_TINY
-# define IS_MEDIUM(x) x <= BIGGEST_MEDIUM
-# define TINIEST_TINY_SIZE LITTLE_TINY + SIZE_CHUNK_HEADER
+# define IS_MEDIUM(x) x <= BIGGEST_MEDIUM && x > BIGGEST_TINY
+# define IS_BIG(x) x > BIGGEST_MEDIUM
+# define TINIEST_TINY_SIZE LITTLE_TINY + SIZE_CHUNK_HEADER 
 
 bool is_tiny(size_t size);
 bool is_medium(size_t size);
+bool is_big(size_t size);
 bool ret_true(size_t size);
 
 

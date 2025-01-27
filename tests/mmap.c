@@ -6,7 +6,7 @@
 #include "resetMalloc.h"
 #include "testUtils.h"
 
-UTEST_MAIN()
+UTEST_MAIN();
 
 UTEST_F(resetMalloc, malloc_return_non_null) {
 	ASSERT_NE(mymalloc(TINY_TEST_SIZE), NULL);

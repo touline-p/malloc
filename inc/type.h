@@ -20,7 +20,6 @@ typedef struct freed_chunk_s {
 } freed_chunk_t;
 
 typedef struct arena_s {
-	void *top;
 	void *tiny;
 	void *free_tiny;
 	void *medium;
@@ -35,25 +34,35 @@ typedef struct page_s {
 } page_t;
 
 enum zone_e {
-	TINY = 0,
-	MEDIUM = 1,
-	LARGE = 2,
-	ZONE_NB = 3
+	TINY,
+	MEDIUM,
+	LARGE,
+	ZONE_NB,
 };
 
 # define FONCTIONAL_NUMBER 18
 
 # define COMP_CAST(x) ((bool (*) (uint64_t))(x))
-# define ALLOC_CAST(x) ((int (*) (void **, size_t))(x))
+# define ALLOC_CAST(x) ((int (*) (void **, size_t, size_t))(x))
+# define POST_FREE_CAST(x) ((void (*) (void *))(x))
 
 enum zone_function_e {
-	COMPARAISON = 0,
-	TOP = 1,
-	FREED = 2,
-	FAST_ALLOC_PTR = 3,
-	SIZE_MAX_ALLOC = 4,
-	MESSAGE = 5,
-	ALLOCATION_FN = 6,
+	COMPARAISON,
+	TOP,
+	FREED,
+	FAST_ALLOC_PTR,
+	SIZE_MAX_ALLOC,
+	MESSAGE,
+	ALLOCATION_FN,
+	ZONE_FUNCTION_NB
+};
+
+enum free_function_e {
+	COMPARAISON_F,
+	MESSAGE_F,
+	FREED_F,
+	POST_FREE_FN_F,
+	FUNCTION_NB_F
 };
 
 #endif

@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stddef.h>
 #include <limits.h>
 #include <stdint.h>
@@ -18,16 +19,19 @@
 
 size_t size_allocation(size_t size);
 int try_init_page(void **to_init, size_t size);
-int try_init_adjusted(void **to_init, size_t size);
+int try_init_adjusted(void **to_init, size_t max_size, size_t size);
 
 void *allocate_memory(void **arena, size_t size) {
 	chunk_info_t * disponible_chunk;
 	size_t used_size = size;
 
-
 	size = size_allocation(size);
 	disponible_chunk = *arena;
 	size_t disponible_chunk_size = GET_SIZE(disponible_chunk);
+
+	printf("size a allouer : %lu\n", size);
+	printf("taille disponible %ld\n", disponible_chunk);
+
 	if (disponible_chunk_size - size - TINIEST_TINY_SIZE <= 0) {
 		*arena = NULL;
 		return get_addr_from_header(disponible_chunk);
@@ -65,16 +69,23 @@ void *get_next_freed(void **disponible_chunks, size_t size) {
 
 void *group_malloc(void ***fn_addr, size_t size) {
 	void *ret_val;
-	dprintf(2, "%s", ((char **)fn_addr)[MESSAGE]);
 	if (COMP_CAST(fn_addr[COMPARAISON])(size)) {
+		printf("group_malloc : size : %lu\n", size);
+		printf("this is a %s\n", fn_addr[MESSAGE]);
 
 		if (*fn_addr[FREED] != NULL &&
-			NULL != (ret_val = get_next_freed(fn_addr[FREED], size)))
+			NULL != (ret_val = get_next_freed(fn_addr[FREED], size))) {
+			printf("I return next_freed\n");
 			return ret_val;
-		if (*fn_addr[TOP] == NULL && !ALLOC_CAST(fn_addr[ALLOCATION_FN])(fn_addr[TOP], (size_t)fn_addr[SIZE_MAX_ALLOC]))
+		}
+		if (*fn_addr[TOP] == NULL && !ALLOC_CAST(fn_addr[ALLOCATION_FN])(fn_addr[TOP], (size_t)fn_addr[SIZE_MAX_ALLOC], size)) {
+			printf("mistake was made.\n");
 			return NULL;
-		if (size > GET_SIZE(fn_addr[TOP]))
+		}
+		if (size > GET_SIZE(fn_addr[TOP])) {
+			printf("i restock\n");
 			stock_and_reinit(fn_addr[TOP], fn_addr[FREED], size);
+		}
 		return allocate_memory(fn_addr[TOP], size);
 	}
 	return NULL;
@@ -84,7 +95,7 @@ void *group_malloc(void ***fn_addr, size_t size) {
 
 void *mymalloc(uint64_t size) {
 	void *ret_val;
-	static void **fn_addr[ZONE_NB][FONCTIONAL_NUMBER] = {
+	static void **fn_addr[ZONE_NB][ZONE_FUNCTION_NB] = {
 		{
 			(void *)&is_tiny,
 			&arena_g.tiny,
@@ -104,11 +115,11 @@ void *mymalloc(uint64_t size) {
 			(void *)&try_init_page,
 		},
 		{
-			(void *)&ret_true,
+			(void *)&is_big,
 			&arena_g.big,
 			&arena_g.free_big,
 			(void *)&fast_alloc,
-			(void *)SSIZE_MAX,
+			(void *)0,
 			(void *)"Large\n",
 			(void *)&try_init_adjusted,
 		},
@@ -117,24 +128,33 @@ void *mymalloc(uint64_t size) {
 
 	zone = TINY;
 	ret_val = NULL;
-	while (zone < LARGE && NULL == ret_val) {
+	while (zone < ZONE_NB && NULL == ret_val) {
 		ret_val = group_malloc(fn_addr[zone++], size); 
-		dprintf(2,"looping\n");
 	}
 	return ret_val;
 }
 
-int try_init_adjusted(void **to_init, size_t size) {
+int try_init_adjusted(void **to_init, size_t max_size, size_t size) {
+	printf("init adjusted\n");
 	chunk_info_t *chunk;
 
+	printf("allocating size : %ld\n", size);
 	size += SIZE_CHUNK_HEADER;
+	size /= sysconf(_SC_PAGESIZE);
+	size += 1;
+	size *= sysconf(_SC_PAGESIZE);
+	printf("allocating size : %ld\n", size);
+
 	*to_init = mmap_call(NULL, size);
+
+	printf("%d\n", errno);
+
 	if (*to_init == (void *)-1)
 		return false;
+	chunk = *to_init;
 	bzero(chunk, size);
-	*chunk = (chunk_info_t)size - SIZE_CHUNK_HEADER;
+	*chunk = (chunk_info_t)size;
 	toggle_mask(chunk, FIRST_IN_ZONE);
-
 	return true;
 }
 
