@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <strings.h>
+#include "resetMalloc.h"
 
 UTEST_MAIN();
 
@@ -31,4 +32,8 @@ UTEST(chunk, two_subsequent_alloc_are_diff) {
 	chunk_info_t *second = mymalloc(2);
 
 	ASSERT_TRUE(first != second);
+}
+
+UTEST_F(resetMalloc, used_size_is_set) {
+	
 }

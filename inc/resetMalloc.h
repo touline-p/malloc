@@ -1,8 +1,13 @@
 #ifndef RESETMALLOC_H
 # define RESETMALLOC_H
 
-#include "utest.h"
+#include <utest.h>
+
 #include "mymalloc.h"
+#include "size.h"
+#include "type.h"
+#include "globals.h"
+#include "maskmanipulation.h"
 
 struct resetMalloc {
 };

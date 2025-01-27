@@ -1,7 +1,10 @@
-#include "mymalloc.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <sys/mman.h>
+
+#include "size.h"
+#include "mymalloc.h"
+#include "globals.h"
 
 size_t size_allocation(size_t size) {
 	size -= 1;

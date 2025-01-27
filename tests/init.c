@@ -1,5 +1,6 @@
 #include "utest.h"
-#include "mymalloc.h"
+#include "type.h"
+#include "globals.h"
 
 arena_t arena_g;
 

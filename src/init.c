@@ -3,6 +3,9 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
+#include "type.h"
+#include "globals.h"
+
 arena_t arena_g;
 uint64_t size_mask;
 size_t allocated_page;

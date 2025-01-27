@@ -1,7 +1,7 @@
 #include "utest.h"
-#include "mymalloc.h"
 #include <stdint.h>
-#include <string.h>
+#include "type.h"
+#include "maskmanipulation.h"
 
 UTEST_MAIN();
 

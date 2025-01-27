@@ -1,13 +1,17 @@
-#include <bits/posix1_lim.h>
 #include <stddef.h>
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "mymalloc.h"
 
 #include <strings.h>
 #include <unistd.h>
+
+#include "mymalloc.h"
+#include "size.h"
+#include "type.h"
+#include "maskmanipulation.h"
+#include "globals.h"
 
 #define ALLOCATION_GROUP_NUMBER 3
 
@@ -39,22 +43,6 @@ void *allocate_memory(void **arena, size_t size) {
 
 size_t fast_alloc;
 
-bool is_tiny(size_t size) {
-	dprintf(2, "%d is tiny %d\n", size, IS_TINY(size));
-	return IS_TINY(size);
-}
-
-bool is_medium(size_t size) {
-	dprintf(2, "%d is medium %d\n", size, IS_TINY(size));
-	return IS_MEDIUM(size);
-}
-
-bool ret_true(size_t size) {
-	dprintf(2, "%d is big %d\n", size, true);
-	(void *)size;
-	return true;
-}
-
 void *get_next_freed(void **disponible_chunks, size_t size) {
 	void *ret_val;
 
@@ -77,7 +65,7 @@ void *get_next_freed(void **disponible_chunks, size_t size) {
 
 void *group_malloc(void ***fn_addr, size_t size) {
 	void *ret_val;
-	dprintf(2, (char *)(fn_addr[MESSAGE]));
+	dprintf(2, "%s", ((char **)fn_addr)[MESSAGE]);
 	if (COMP_CAST(fn_addr[COMPARAISON])(size)) {
 
 		if (*fn_addr[FREED] != NULL &&
@@ -96,15 +84,15 @@ void *group_malloc(void ***fn_addr, size_t size) {
 
 void *mymalloc(uint64_t size) {
 	void *ret_val;
-	static void **fn_addr[ZONE_NUMBER][FONCTIONAL_NUMBER] = {
+	static void **fn_addr[ZONE_NB][FONCTIONAL_NUMBER] = {
 		{
 			(void *)&is_tiny,
 			&arena_g.tiny,
 			&arena_g.free_tiny,
 			(void *)&fast_alloc,
 			(void *)BIGGEST_TINY,
-			"little\n",
-			&try_init_page,
+			(void *)"little\n",
+			(void *)&try_init_page,
 		},
 		{
 			(void *)&is_medium,
@@ -112,8 +100,8 @@ void *mymalloc(uint64_t size) {
 			&arena_g.free_medium,
 			(void *)&fast_alloc,
 			(void *)BIGGEST_MEDIUM,
-			"medium\n",
-			&try_init_page,
+			(void *)"medium\n",
+			(void *)&try_init_page,
 		},
 		{
 			(void *)&ret_true,
@@ -121,8 +109,8 @@ void *mymalloc(uint64_t size) {
 			&arena_g.free_big,
 			(void *)&fast_alloc,
 			(void *)SSIZE_MAX,
-			"Large\n",
-			&try_init_adjusted,
+			(void *)"Large\n",
+			(void *)&try_init_adjusted,
 		},
 	};
 	enum zone_e zone;
@@ -134,12 +122,6 @@ void *mymalloc(uint64_t size) {
 		dprintf(2,"looping\n");
 	}
 	return ret_val;
-}
-
-void myfree(void *addr) {
-	void *header = get_header_from_addr(addr);
-	NEXT_FREED_CHUNK(header) = arena_g.free_tiny;
-	arena_g.free_tiny = header;
 }
 
 int try_init_adjusted(void **to_init, size_t size) {
