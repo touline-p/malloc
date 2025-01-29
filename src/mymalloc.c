@@ -35,7 +35,7 @@ void *allocate_memory(void **top_ptr, size_t size, size_t size_min) {
 	size_t disponible_chunk_size = GET_SIZE(disponible_chunk);
 
 
-	printf("disponible_chunk_size is : %ld and i allocate %ld\n", disponible_chunk_size, size);
+	printf("disponible_chunk_size is : %ld and i allocate %ld, size_min is %ld\n", disponible_chunk_size, size, size_min);
 	if ((disponible_chunk_size - size) < (size_min)) {
 		printf("I nullify top and give the zone.\n");
 

@@ -15,6 +15,7 @@
 static void free_zone(void ***fn_addr, void *addr, size_t size);
 void unmap_zone(freed_chunk_t *header);
 void coalesce_chunk(freed_chunk_t *header);
+void coalescing_medium(void *header);
 
 void myfree(void *addr) {
 	void *header;
@@ -30,7 +31,7 @@ void myfree(void *addr) {
 			(void *)&is_medium, 
 			(void *)"med",
 			&arena_g.free_medium,
-			(void *)&coalesce_chunk,
+			(void *)&coalescing_medium,
 		},
 		{
 			(void *)&is_big,
@@ -49,6 +50,8 @@ void myfree(void *addr) {
 		zone++;
 	}
 
+	printf("zone is %d\n", zone);
+
 	free_zone(fn_addr[zone], header, size);
 }
 
@@ -58,14 +61,24 @@ void suppress_chunk(freed_chunk_t *to_suppress) {
 	to_suppress->prev->next = to_suppress->next;
 }
 
+void coalescing_medium(void *addr) {
+	freed_chunk_t *header = addr;
+	if (header->next)
+		coalesce_chunk(header);
+	if (header->prev)
+		coalesce_chunk(header->prev);
+}
+
 void coalesce_chunk(freed_chunk_t *header) {
 	printf("coalescing\n");
 	printf("%p : %p\n", GET_SIZE(header) + SIZE_CHUNK_HEADER + ((void *)header), header->next);
 	printf("diff %ld\n", (GET_SIZE(header) + SIZE_CHUNK_HEADER + (size_t)header) - (size_t)header->next);
 	if (GET_SIZE(header) + SIZE_CHUNK_HEADER + (void *)header == header->next) {
-		*(size_t *)header = GET_SIZE(header) + GET_SIZE(header->next);
+		*(size_t *)header = GET_SIZE(header) + GET_SIZE(header->next) + SIZE_CHUNK_HEADER; 
 		suppress_chunk(header->next);
-		printf("coalescing header\n");
+		printf("coalescing happening\n");
+		printf("new chunk size : %ld\n", GET_SIZE(header));
+		
 	}
 }
 
@@ -103,8 +116,7 @@ static void free_zone(void ***fn_addr, void *to_free, size_t size) {
 		if (NULL != tmp)
 			tmp->prev = header;
 	}
-	if (header->next)
-		coalesce_chunk(header);
-	if (header->prev)
-		coalesce_chunk(header->prev);
+	if (fn_addr[POST_FREE_FN_F]) {
+		POST_FREE_CAST(fn_addr[POST_FREE_FN_F])(header);
+	}
 }
