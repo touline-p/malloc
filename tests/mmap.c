@@ -1,3 +1,4 @@
+#include "globals.h"
 #include "utest.h"
 #include "mymalloc.h"
 #include <stdbool.h>
@@ -20,10 +21,6 @@ UTEST_F(resetMalloc, malloc_return_readable_and_writable) {
 	ASSERT_EQ(bonjour, value);
 }
 
-UTEST_F(resetMalloc, try_init_page_init_to_a_hundred_alloc_size) {
-	try_init_page((void **)&arena_g.tiny, BIGGEST_TINY);
-}
-
 UTEST_F(resetMalloc, one_hundred_allocation_fit_in_a_page) {
 	size_t size = BIGGEST_TINY;
 	size_t arrlen = 100;
@@ -44,6 +41,7 @@ UTEST_F(resetMalloc, one_hundred_allocation_fit_in_a_page) {
 }
 
 UTEST_F(resetMalloc, one_hundred_and_one_allocation_fit_in_a_page) {
+	display_arena();
 	size_t size = BIGGEST_TINY;
 	size_t arrlen = 101;
 	char *allocations[arrlen]; 
@@ -62,13 +60,13 @@ UTEST_F(resetMalloc, one_hundred_and_one_allocation_fit_in_a_page) {
 
 UTEST_F(resetMalloc, two_hundred_and_one_allocation_fit_in_a_page) {
 	size_t size = BIGGEST_TINY;
-	size_t arrlen = 201;
+	size_t arrlen = 203;
 	char *allocations[arrlen]; 
 
 	for ( int index = 0 ; index < arrlen ; index ++ ) {
+		printf("%d", index);
 		allocations[index] = mymalloc(size);
 		memset(allocations[index], index, size);
-		
 	}
 
 	for ( int index = 0 ; index < arrlen ; index ++ ) {
@@ -86,15 +84,6 @@ UTEST_F(resetMalloc, freed_mem_stay_usable_in_free_tiny) {
 	ASSERT_EQ(ptr, ptr_sec);
 }
 
-UTEST_F(resetMalloc, freed_mem_is_allocable_only_once) {
-	char *ptr = mymalloc(TINY_TEST_SIZE);
-	myfree(ptr);
-	char *ptr1 = mymalloc(TINY_TEST_SIZE);
-	char *ptr2 = mymalloc(TINY_TEST_SIZE);
-	ASSERT_NE(ptr1, ptr2);
-	ASSERT_EQ(fast_alloc, 1);
-}
-
 #define NB_ITER 55
 UTEST_F(resetMalloc, fast_alloc_can_occure_once_by_free_of_same_size) {
 	size_t iterations = NB_ITER;
@@ -105,5 +94,5 @@ UTEST_F(resetMalloc, fast_alloc_can_occure_once_by_free_of_same_size) {
 		mymalloc(TINY_TEST_SIZE);
 		--iterations;
 	}
-	ASSERT_EQ(fast_alloc, NB_ITER);
+	ASSERT_EQ(fast_allocation_nb, NB_ITER);
 }

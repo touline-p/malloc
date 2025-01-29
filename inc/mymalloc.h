@@ -7,12 +7,15 @@
 void *mymalloc(size_t size);
 void myfree(void *addr);
 int try_init_page(void **to_init, size_t size);
-void *mmap_call(void *addr, size_t length);
 void *allocate_page(void *proximity);
 void stock_and_reinit(void **to_stock, void **to_init, size_t size);
 size_t size_allocation(size_t size);
 
 void init_malloc(void);
 void unmap_all_page(void);
+
+void display_arena(void);
+
+# define IGNORE_ARGUMENTS 0
 
 #endif

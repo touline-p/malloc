@@ -51,6 +51,7 @@ enum zone_function_e {
 	TOP,
 	FREED,
 	FAST_ALLOC_PTR,
+	SIZE_MIN_ALLOC,
 	SIZE_MAX_ALLOC,
 	MESSAGE,
 	ALLOCATION_FN,

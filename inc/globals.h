@@ -8,6 +8,6 @@
 extern arena_t arena_g;
 extern page_t pages[MAX_PAGE];
 extern size_t allocated_page;
-extern size_t fast_alloc;
+extern size_t fast_allocation_nb;
 
 #endif // !GLOBAL_H
