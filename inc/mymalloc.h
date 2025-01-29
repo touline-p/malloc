@@ -3,6 +3,7 @@
 # include <stddef.h>
 # include <stdbool.h>
 # include <stdint.h>
+# include "type.h"
 
 void *mymalloc(size_t size);
 void myfree(void *addr);
@@ -15,6 +16,8 @@ void init_malloc(void);
 void unmap_all_page(void);
 
 void display_arena(void);
+
+void display_free(freed_chunk_t *link);
 
 # define IGNORE_ARGUMENTS 0
 

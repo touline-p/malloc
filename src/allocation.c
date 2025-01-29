@@ -44,9 +44,7 @@ void stock_and_reinit(
 	void **to_init,
 	size_t size
 ) {
-	if (*to_stock == NULL) {
-		*to_stock = *to_init;
-	}
+	//** TODO multiple end of page going to the free must be put in chain list **//
 	allocate_memory_pool(to_init, size, IGNORE_ARGUMENTS);
 }
 

@@ -12,12 +12,14 @@ struct chain_s {
 
 typedef uint64_t chunk_info_t;
 
-typedef struct freed_chunk_s {
+typedef struct freed_chunk_s freed_chunk_t;
+
+struct freed_chunk_s {
 	chunk_info_t chunk_info_first;
 	chunk_info_t chunk_info_second;
-	void *next;
-	void *prev;
-} freed_chunk_t;
+	freed_chunk_t *next;
+	freed_chunk_t *prev;
+};
 
 typedef struct arena_s {
 	void *tiny;

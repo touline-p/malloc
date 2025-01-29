@@ -35,7 +35,7 @@ UTEST_F(resetMalloc, big_freed_mem_is_unmapped) {
 	printf("%p\n", biggy);
 	myfree(biggy);
 }
-/*
+
 UTEST_F(resetMalloc, med_freed_mem_is_coalescing) {
 	void *arr[ALLOC_BY_ZONE];
 
@@ -57,7 +57,4 @@ UTEST_F(resetMalloc, med_freed_mem_is_coalescing) {
 	display_arena();
 
 	ASSERT_EQ(arena_g.medium, NULL);
-
-
 }
-*/

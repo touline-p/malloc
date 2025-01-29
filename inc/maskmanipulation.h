@@ -9,6 +9,7 @@
 # define PREV_IN_USE MASK(0x01)
 # define CHUNK_IN_USE MASK(0x02)
 # define FIRST_IN_ZONE MASK(0x04)
+# define LAST_IN_ZONE MASK(0x04)
 
 # define CHNK_CLR(x) *x = 0
 # define SIZE_MASK 0xffffffffff
