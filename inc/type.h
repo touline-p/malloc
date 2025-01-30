@@ -50,6 +50,10 @@ enum zone_e {
 	ZONE_NB,
 };
 
+
+# define FIRST_POOL TINY
+# define POOL_NB MEDIUM + 1
+
 # define FONCTIONAL_NUMBER 18
 
 # define COMP_CAST(x) ((bool (*) (uint64_t))(x))

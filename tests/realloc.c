@@ -1,11 +1,15 @@
+#include "globals.h"
 #include "maskmanipulation.h"
 #include "size.h"
+#include "type.h"
 #include "utest.h"
 #include "resetMalloc.h"
 #include "mymalloc.h"
+#include <bits/posix1_lim.h>
 
 UTEST_MAIN();
 
+bool is_in_same_pool(size_t from, size_t to);
 
 UTEST_F(resetMalloc, malloc_tiny_has_usable_size) {
 	size_t size = 12;
@@ -25,15 +29,60 @@ UTEST_F(resetMalloc, tiny_to_tiny_use_size) {
 	ASSERT_EQ(GET_USE_SIZE(get_header_from_addr(realloc_addr)), size + 2);
 }
 
-UTEST_F(resetMalloc, tiny_to_tinier_reuse_same_addr) {
+UTEST(zone, is_in_same_pool_unit_test) {
+	static size_t zones_max[POOL_NB] = {
+		BIGGEST_TINY,
+		BIGGEST_MEDIUM,
+	};
+	ASSERT_TRUE(is_in_same_pool(TINY_TEST_SIZE, TINY_TEST_SIZE));
+	ASSERT_FALSE(is_in_same_pool(MEDIUM_TEST_SIZE, TINY_TEST_SIZE));
+	ASSERT_FALSE(is_in_same_pool(LARGE_TEST_SIZE, TINY_TEST_SIZE));
+	ASSERT_FALSE(is_in_same_pool(TINY_TEST_SIZE, MEDIUM_TEST_SIZE));
+	ASSERT_TRUE(is_in_same_pool(MEDIUM_TEST_SIZE, MEDIUM_TEST_SIZE));
+	ASSERT_FALSE(is_in_same_pool(LARGE_TEST_SIZE, MEDIUM_TEST_SIZE));
+	ASSERT_FALSE(is_in_same_pool(TINY_TEST_SIZE, LARGE_TEST_SIZE));
+	ASSERT_FALSE(is_in_same_pool(MEDIUM_TEST_SIZE, LARGE_TEST_SIZE));
+	ASSERT_FALSE(is_in_same_pool(LARGE_TEST_SIZE, LARGE_TEST_SIZE));
+}
+
+UTEST_F(resetMalloc, tiny_to_tiny_reuse_same_addr) {
+	//tinier
 	void *addr = mymalloc(BIGGEST_TINY);
 	void *realloc_addr = myrealloc(addr, BIGGEST_TINY - 2);
+	ASSERT_EQ(addr, realloc_addr);
 
+	//same
+	addr = realloc_addr;
+	realloc_addr = myrealloc(addr, BIGGEST_TINY - 2);
+	ASSERT_EQ(addr, realloc_addr);
+
+	//bigger	
+	addr = realloc_addr;
+	realloc_addr = myrealloc(addr, BIGGEST_TINY);
 	ASSERT_EQ(addr, realloc_addr);
 }
 
-UTEST_F(resetMalloc, tiny_to_tinier_keep_first_info) {
+UTEST_F(resetMalloc, realloc_with_zero_sized_just_free) {
+	void *addr = mymalloc(TINY_TEST_SIZE);
+	myrealloc(addr, 0);
+	ASSERT_NE(arena_g.free_tiny, NULL);
 
+	addr = mymalloc(MEDIUM_TEST_SIZE);
+	myrealloc(addr, 0);
+	ASSERT_NE(arena_g.free_medium, NULL);
+}
+
+
+#define MARK 15
+
+UTEST_F(resetMalloc, tiny_to_tinier_keep_data_integrity) {
+	void *addr = mymalloc(BIGGEST_TINY);
+	char array[BIGGEST_TINY];
+	memset(addr, MARK, BIGGEST_TINY);
+	memcpy(array, addr, BIGGEST_TINY);
+	addr = myrealloc(addr, BIGGEST_TINY - 2);
+	
+	ASSERT_TRUE(memcmp(addr, array, BIGGEST_TINY - 2) == 0);
 }
 
 UTEST_F(resetMalloc, tiny_to_tiny_alloc_is_usable) {
