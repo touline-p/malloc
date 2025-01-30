@@ -11,8 +11,8 @@ struct chunkInfoFixture {
 };
 
 UTEST_F_SETUP(chunkInfoFixture) {
-	utest_fixture->a = malloc(sizeof(uint64_t));
-	utest_fixture->b = malloc(sizeof(uint64_t));
+	utest_fixture->a = malloc(sizeof(uint64_t) * 3);
+	utest_fixture->b = malloc(sizeof(uint64_t) * 3);
 	memset(utest_fixture->a, 0, sizeof(chunk_info_t));
 	CHNK_CLR(utest_fixture->b);
 	ASSERT_EQ(*utest_fixture->a, *utest_fixture->b);
@@ -44,6 +44,11 @@ UTEST_F(chunkInfoFixture, get_size_with_masked_info) {
 	ASSERT_TRUE(mask_is_set(utest_fixture->a, PREV_IN_USE));
 	ASSERT_FALSE(mask_is_set(utest_fixture->b, PREV_IN_USE));
 	ASSERT_EQ(GET_SIZE(utest_fixture->a),GET_SIZE(utest_fixture->b));
+}
+
+UTEST_F(chunkInfoFixture, use_size_is_working) {
+	SET_USE_SIZE(utest_fixture->a, 18);
+	ASSERT_EQ(GET_USE_SIZE(utest_fixture->a), 18);
 }
 
 

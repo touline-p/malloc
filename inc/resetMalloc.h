@@ -21,4 +21,12 @@ UTEST_F_TEARDOWN(resetMalloc) {
 	unmap_all_page();
 }
 
+bool check_integrity(char mark, size_t size, void *addr) {
+	for (size_t index = 0 ; index < size ; index++) {
+		if (*(char *)addr != mark)
+			return false;
+	}
+	return true;
+}
+
 #endif // !RESETMALLOC_H

@@ -137,6 +137,8 @@ void *mymalloc(uint64_t size) {
 	};
 	enum zone_e zone;
 
+	if (size == 0)
+		return NULL;
 	zone = TINY;
 	ret_val = NULL;
 	while (false == COMP_CAST(fn_addr[zone][COMPARAISON])(size))

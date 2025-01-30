@@ -9,7 +9,7 @@ UTEST_MAIN();
 
 
 
-UTEST_F(resetMalloc, malloc_is_freeable) {
+UTEST_F(resetMalloc, NULL_is_freeable) {
 	void *my_malloc = mymalloc(0);
 	myfree(my_malloc);
 }

@@ -1,8 +1,10 @@
 #ifndef MASKMANIPULATION_H
 # define MASKMANIPULATION_H
 
-# include "stdint.h"
-# include "stdbool.h"
+# include <stdint.h>
+# include <stdbool.h>
+
+# include "type.h"
 
 # define MASK(x) x ## 00000000000000
 

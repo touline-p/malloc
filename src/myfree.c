@@ -42,6 +42,8 @@ void myfree(void *addr) {
 	};
 	enum zone_e zone = TINY;
 
+	if (addr == NULL)
+		return ;
 	header = get_header_from_addr(addr);
 	size = GET_SIZE(header);
 	NEXT_FREED_CHUNK(header) = NULL;

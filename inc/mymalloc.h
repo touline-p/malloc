@@ -19,6 +19,8 @@ void display_arena(void);
 
 void display_free(freed_chunk_t *link);
 
+void *myrealloc(void *addr, size_t size);
+
 # define IGNORE_ARGUMENTS 0
 
 #endif
