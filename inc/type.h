@@ -21,6 +21,14 @@ struct freed_chunk_s {
 	freed_chunk_t *prev;
 };
 
+typedef struct page_info_s page_info_t;
+
+struct page_info_s {
+	void *ptr;
+	size_t length;
+	page_info_t *next;
+};
+
 typedef struct arena_s {
 	void *tiny;
 	void *free_tiny;
