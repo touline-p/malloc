@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <sys/mman.h>
 
+#include "maskmanipulation.h"
 #include "size.h"
 #include "mymalloc.h"
 
@@ -20,5 +21,3 @@ uint64_t *get_header_from_addr(uint64_t *header) {
 uint64_t *get_addr_from_header(uint64_t *addr) {
 	return addr + OFFSET_HEADER;
 }
-
-

@@ -1,24 +1,27 @@
 #ifndef RESETMALLOC_H
 # define RESETMALLOC_H
 
-#include <utest.h>
+#include <stdio.h>
+# include <sys/mman.h>
+# include <utest.h>
 
-#include "mymalloc.h"
-#include "size.h"
-#include "type.h"
-#include "globals.h"
-#include "maskmanipulation.h"
+# include "mymalloc.h"
+# include "size.h"
+# include "type.h"
+# include "globals.h"
+# include "maskmanipulation.h"
+
+# define HEADER(addr) get_header_from_addr(addr)
 
 struct resetMalloc {
 };
 
 UTEST_F_SETUP(resetMalloc) {
 	init_malloc();
-	ASSERT_EQ(allocated_page, 0);
 }
 
 UTEST_F_TEARDOWN(resetMalloc) {
-	unmap_all_page();
+	clean_malloc();
 }
 
 bool check_integrity(char mark, size_t size, void *addr) {

@@ -11,7 +11,6 @@
 #include "type.h"
 #include "globals.h"
 
-static void *mmap_call(void *proximity, size_t length);
 
 static bool call_mmap_and_set_header(
 	size_t allocation_size,
@@ -32,7 +31,7 @@ int allocate_unique_zone(
 }
 
 int allocate_memory_pool(void **to_init, size_t size, size_t ignore) {
-	printf("allocating a new memory pool\n");
+	printf("allocate_memory_pool\n");
 	(void)ignore;
 	size += SIZE_CHUNK_HEADER;
 	size *= 100;
@@ -48,12 +47,11 @@ void stock_and_reinit(
 	allocate_memory_pool(to_init, size, IGNORE_ARGUMENTS);
 }
 
-static void *mmap_call(void *proximity, size_t length) {
+void *mmap_call(void *proximity, size_t length) {
 	void *addr = mmap(proximity, length, PROT_WRITE | PROT_READ, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-	printf("mmap was called\n");
-	pages[allocated_page].addr = addr;
-	pages[allocated_page].size = length;
-	allocated_page += 1;
+	printf("pre index\n");
+	index_page(addr, length);
+	printf("post index\n");
 	return addr;
 }
 
@@ -63,14 +61,15 @@ static bool call_mmap_and_set_header(
 ) {
 	chunk_info_t *chunk;
 
+	printf("pre mmap_call\n");
 	*dst = mmap_call(NULL, allocation_size);
+	printf("post mmap_call\n");
 	if (*dst == (void *)-1)
 		return false;
 	chunk = *dst;
 
 	bzero(chunk, allocation_size);
 	*chunk = (chunk_info_t)allocation_size;
-	printf("size in mmap %ld\n", (size_t)GET_SIZE(*dst));
 	toggle_mask(chunk, FIRST_IN_ZONE);
 	return true;
 }

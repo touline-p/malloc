@@ -21,13 +21,22 @@ struct freed_chunk_s {
 	freed_chunk_t *prev;
 };
 
+enum zone_e {
+	TINY,
+	MEDIUM,
+	LARGE,
+	ZONE_NB,
+};
+
 typedef struct page_info_s page_info_t;
 
 struct page_info_s {
 	void *ptr;
 	size_t length;
-	page_info_t *next;
+	enum zone_e zone;
 };
+
+typedef struct page_chain_s page_chain_t;
 
 typedef struct arena_s {
 	void *tiny;
@@ -36,6 +45,10 @@ typedef struct arena_s {
 	void *free_medium;
 	void *big;
 	void *free_big;
+	page_info_t *pages_arr;
+	size_t max_size;
+	size_t used_size;
+	size_t page_nb;
 } arena_t;
 
 typedef struct page_s {
@@ -43,12 +56,7 @@ typedef struct page_s {
 	size_t size;
 } page_t;
 
-enum zone_e {
-	TINY,
-	MEDIUM,
-	LARGE,
-	ZONE_NB,
-};
+
 
 
 # define FIRST_POOL TINY

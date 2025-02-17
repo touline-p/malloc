@@ -45,14 +45,13 @@ void myfree(void *addr) {
 	if (addr == NULL)
 		return ;
 	header = get_header_from_addr(addr);
-	size = GET_SIZE(header);
+	size = GET_USE_SIZE(header);
 	NEXT_FREED_CHUNK(header) = NULL;
 
 	while (false == COMP_CAST(fn_addr[zone][COMPARAISON])(size)){
 		zone++;
 	}
 
-	printf("zone is %d\n", zone);
 
 	free_zone(fn_addr[zone], header, size);
 }
@@ -60,7 +59,8 @@ void myfree(void *addr) {
 void suppress_chunk(freed_chunk_t *to_suppress) {
 	if (to_suppress->next)
 		to_suppress->next->prev = to_suppress->prev;
-	to_suppress->prev->next = to_suppress->next;
+	if (to_suppress->prev)
+		to_suppress->prev->next = to_suppress->next;
 }
 
 void coalescing_medium(void *addr) {
@@ -72,14 +72,12 @@ void coalescing_medium(void *addr) {
 }
 
 void coalesce_chunk(freed_chunk_t *header) {
-	printf("coalescing\n");
-	printf("%p : %p\n", GET_SIZE(header) + SIZE_CHUNK_HEADER + ((void *)header), header->next);
-	printf("diff %ld\n", (GET_SIZE(header) + SIZE_CHUNK_HEADER + (size_t)header) - (size_t)header->next);
-	if (GET_SIZE(header) + SIZE_CHUNK_HEADER + (void *)header == header->next) {
-		*(size_t *)header = GET_SIZE(header) + GET_SIZE(header->next) + SIZE_CHUNK_HEADER; 
+	size_t new_size;
+
+	if (GET_SIZE(header) + (void *)header == header->next) {
+		new_size = GET_SIZE(header) + GET_SIZE(header->next);
+		ASSIGN_SIZE((chunk_info_t*)header, &new_size);
 		suppress_chunk(header->next);
-		printf("coalescing happening\n");
-		printf("new chunk size : %ld\n", GET_SIZE(header));
 		
 	}
 }
@@ -88,20 +86,20 @@ void unmap_zone(freed_chunk_t *header) {
 	munmap((void *)header, GET_SIZE(header));
 }
 
-static void free_zone(void ***fn_addr, void *to_free, size_t size) {
-	freed_chunk_t *header = to_free;
+static void free_zone(void ***fn_addr, void *uncast_header, size_t size) {
+	freed_chunk_t *header = uncast_header;
 	freed_chunk_t *link = *fn_addr[FREED_F];
 	freed_chunk_t *tmp;
 
-	printf("free of zone of size %ld\n", GET_SIZE(to_free));
-	display_free(*fn_addr[FREED_F]);
+//display_free(*fn_addr[FREED_F]);
+	toggle_mask(uncast_header, CHUNK_IN_USE);
 	if (*fn_addr[FREED_F] == NULL) {
 		printf("first_free\n");
 		*fn_addr[FREED_F] = header;
 		header->next = NULL;
 		header->prev = NULL;
 	}
-	else if (to_free < *fn_addr[FREED_F]) {
+	else if (uncast_header < *fn_addr[FREED_F]) {
 		printf("free au premier chainon\n");
 		header->next = *fn_addr[FREED_F];
 		header->prev = NULL;

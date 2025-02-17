@@ -1,7 +1,11 @@
 #include "globals.h"
+#include "size.h"
+#include "type.h"
 #include "utest.h"
 #include "mymalloc.h"
+#include <alloca.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 #include "resetMalloc.h"
@@ -21,12 +25,17 @@ UTEST_F(resetMalloc, malloc_return_readable_and_writable) {
 	ASSERT_EQ(bonjour, value);
 }
 
+size_t allocated_page(void) {
+	return arena_g.used_size / sizeof(page_info_t);
+}
+
+
 UTEST_F(resetMalloc, one_hundred_allocation_fit_in_a_page) {
 	size_t size = BIGGEST_TINY;
 	size_t arrlen = 100;
 	char *allocations[arrlen]; 
 
-	ASSERT_EQ(allocated_page, 0);
+	ASSERT_EQ(allocated_page(), 0);
 
 	for ( int index = 0 ; index < arrlen ; index ++ ) {
 		allocations[index] = mymalloc(size);
@@ -37,7 +46,7 @@ UTEST_F(resetMalloc, one_hundred_allocation_fit_in_a_page) {
 	for ( int index = 0 ; index < arrlen ; index ++ ) {
 		ASSERT_TRUE(is_memset_to(allocations[index], index, size));
 	}
-	ASSERT_EQ(allocated_page, 1);
+	ASSERT_EQ(allocated_page(), 1);
 }
 
 UTEST_F(resetMalloc, one_hundred_and_one_allocation_fit_in_a_page) {
@@ -55,7 +64,7 @@ UTEST_F(resetMalloc, one_hundred_and_one_allocation_fit_in_a_page) {
 	for ( int index = 0 ; index < arrlen ; index ++ ) {
 		ASSERT_TRUE(is_memset_to(allocations[index], index, size));
 	}
-	ASSERT_EQ(allocated_page, 2);
+	ASSERT_EQ(allocated_page(), 2);
 }
 
 UTEST_F(resetMalloc, two_hundred_and_one_allocation_fit_in_a_page) {
@@ -64,7 +73,6 @@ UTEST_F(resetMalloc, two_hundred_and_one_allocation_fit_in_a_page) {
 	char *allocations[arrlen]; 
 
 	for ( int index = 0 ; index < arrlen ; index ++ ) {
-		printf("%d", index);
 		allocations[index] = mymalloc(size);
 		memset(allocations[index], index, size);
 	}
@@ -72,7 +80,7 @@ UTEST_F(resetMalloc, two_hundred_and_one_allocation_fit_in_a_page) {
 	for ( int index = 0 ; index < arrlen ; index ++ ) {
 		ASSERT_TRUE(is_memset_to(allocations[index], index, size));
 	}
-	ASSERT_EQ(allocated_page, 3);
+	ASSERT_EQ(allocated_page(), 3);
 }
 
 UTEST_F(resetMalloc, freed_mem_stay_usable_in_free_tiny) {
@@ -95,4 +103,13 @@ UTEST_F(resetMalloc, fast_alloc_can_occure_once_by_free_of_same_size) {
 		--iterations;
 	}
 	ASSERT_EQ(fast_allocation_nb, NB_ITER);
+}
+
+UTEST_F(resetMalloc, malloc_can_allocate_multiple_pages) {
+	size_t iterations = NB_ITER;
+
+	void *addr[NB_ITER];
+	while (iterations--) {
+		addr[iterations] = mymalloc(LARGE_TEST_SIZE);
+	}
 }

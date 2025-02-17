@@ -16,6 +16,7 @@ void display_arena(void) {
 }
 
 void display_free(freed_chunk_t *link) {
+	printf("display_free :\n");
 	size_t index = 0;
 	while (NULL != link) {
 		printf("%d %p size : %5d\n", index++, link, GET_SIZE(link));

@@ -46,8 +46,8 @@ UTEST_F(resetMalloc, med_freed_mem_is_coalescing) {
 	void *two_smaller_alloc[2];
 
 	printf("allocating %ld\n", ((BIGGEST_MEDIUM + SIZE_CHUNK_HEADER) / 2) - SIZE_CHUNK_HEADER);
-	two_smaller_alloc[0] = mymalloc(((BIGGEST_MEDIUM + SIZE_CHUNK_HEADER) / 2) - SIZE_CHUNK_HEADER);
-	two_smaller_alloc[1] = mymalloc(((BIGGEST_MEDIUM + SIZE_CHUNK_HEADER) / 2) - SIZE_CHUNK_HEADER);
+	two_smaller_alloc[0] = mymalloc(((BIGGEST_MEDIUM) / 2) - SIZE_CHUNK_HEADER);
+	two_smaller_alloc[1] = mymalloc(((BIGGEST_MEDIUM) / 2) - SIZE_CHUNK_HEADER);
 	printf("small alloc\n");
 	myfree(two_smaller_alloc[0]);
 	myfree(two_smaller_alloc[1]);

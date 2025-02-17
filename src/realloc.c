@@ -21,14 +21,30 @@ enum pool_function_e {
 	POOL_FUNCTION_NB
 };
 
-void *return_same(void ***zone_data, void *to_realloc, size_t size) {
-	printf("Return _same for group : %s\n", (char *)zone_data[MESSAGE]);
-	SET_USE_SIZE(get_header_from_addr(to_realloc), size);
-	return to_realloc;
+void *return_same(void ***zone_data, void *header, size_t size) {
+	printf("Return _same for group : %s\n", (char *)zone_data[MESSAGE_P]);
+	SET_USE_SIZE(header, size);
+	return get_addr_from_header(header);
 }
 
-void *realloc_medium(void ***zone_data, void *to_realloc, size_t size) {
-	return return_same(zone_data, to_realloc, size);
+void *resize_and_return_addr(void *header, size_t size) {
+	void * ret_val;
+
+	ret_val = mymalloc(size);
+	memcpy(ret_val, get_addr_from_header(header), size);
+	myfree(get_addr_from_header(header));
+	return ret_val;
+}
+
+void *realloc_medium(void ***zone_data, void *header, size_t size) {
+	void *next;
+
+	if (mask_is_set(header, LAST_IN_ZONE) && printf("This chunk is last in zone\n"))
+		return resize_and_return_addr(header, size);
+	next = NEXT_CHUNK_IN_ZONE(header);
+	if (mask_is_set(next, CHUNK_IN_USE) && printf("Next chunk is in use\n"))
+		return resize_and_return_addr(header, size);
+	return return_same(zone_data, header, size);
 }
 
 #define REALLOC_FN_CAST(x) ((void * (*) (void ***, void *, size_t))(x))
@@ -57,21 +73,27 @@ void *same_pool_reallocation(void *addr, size_t size) {
 	while (false == COMP_CAST(fn_addr[zone][CMP_FUNC])(size))
 		++zone;
 	ret_val = NULL;
-	return REALLOC_FN_CAST(fn_addr[zone][REALLOC_FUNC])(fn_addr[zone], addr, size);
+	return REALLOC_FN_CAST(fn_addr[zone][REALLOC_FUNC])(fn_addr[zone], get_header_from_addr(addr), size);
 }
 
 void *myrealloc(void *addr, size_t size) {
+	printf("reallocating %p of size %ld to %ld\n",
+			addr,
+			GET_SIZE(get_header_from_addr(addr)),
+			size);
 	void *new_addr;
 	chunk_info_t *header;
 	size_t used_size;
 
 	if (0 == size) {
+		printf("size is null -> I free and return NULL\n");
 		myfree(addr);
 		return NULL;
 	}
 
 	header = get_header_from_addr(addr);
-	if (true == is_in_same_pool(GET_SIZE(header), size)) {
+	if (true == is_in_same_pool(GET_USE_SIZE(header), size)) {
+		printf("Same pool of size, try to smart realloc\n");
 		return same_pool_reallocation(addr, size);
 	}
 
