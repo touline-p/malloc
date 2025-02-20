@@ -15,9 +15,9 @@ size_t size_allocation(size_t size) {
 }
 
 uint64_t *get_header_from_addr(void *header) {
-	return header - OFFSET_HEADER;
+	return header - SIZE_CHUNK_HEADER;
 }
 
 uint64_t *get_addr_from_header(void *addr) {
-	return addr + OFFSET_HEADER;
+	return addr + SIZE_CHUNK_HEADER;
 }

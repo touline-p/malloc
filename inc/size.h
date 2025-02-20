@@ -18,7 +18,7 @@
 # define LARGE_TEST_SIZE 16000
 
 # define OFFSET_HEADER 2
-# define SIZE_CHUNK_HEADER sizeof(uint64_t) * OFFSET_HEADER
+# define SIZE_CHUNK_HEADER sizeof(chunk_info_t)
 
 # define IS_TINY(x) x <= BIGGEST_TINY
 # define IS_MEDIUM(x) x <= BIGGEST_MEDIUM && x > BIGGEST_TINY

@@ -27,7 +27,10 @@ void display_arena(void);
 void display_free(freed_chunk_t *link);
 
 void show_alloc_mem(void);
+void print_chunk_info_t(chunk_info_t *chunk);
+void print_info_from_addr(chunk_info_t *addr);
 size_t cached_sysconf();
+void display_indexed_page();
 
 
 # define IGNORE_ARGUMENTS 0

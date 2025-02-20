@@ -5,10 +5,10 @@
 # include <stdint.h>
 # include "type.h"
 
-void *mymalloc(size_t size);
+void *malloc(size_t size);
 void *mmap_call(void *proximity, size_t length);
 int index_page(void *addr, size_t length);
-void myfree(void *addr);
+void free(void *addr);
 void *myrealloc(void *addr, size_t size);
 int try_init_page(void **to_init, size_t size);
 void *allocate_page(void *proximity);
