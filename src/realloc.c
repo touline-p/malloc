@@ -4,7 +4,7 @@
 #include <string.h>
 
 #include "maskmanipulation.h"
-#include "mymalloc.h"
+#include "malloc.h"
 #include "size.h"
 #include "type.h"
 #include "globals.h"
@@ -30,9 +30,9 @@ void *return_same(void ***zone_data, void *header, size_t size) {
 void *resize_and_return_addr(void *header, size_t size) {
 	void * ret_val;
 
-	ret_val = mymalloc(size);
+	ret_val = malloc(size);
 	memcpy(ret_val, get_addr_from_header(header), size);
-	myfree(get_addr_from_header(header));
+	free(get_addr_from_header(header));
 	return ret_val;
 }
 
@@ -67,39 +67,34 @@ void *same_pool_reallocation(void *addr, size_t size) {
 		},
 	};
 	enum zone_e zone;
-	void *ret_val;
 
 	zone = TINY;
 	while (false == COMP_CAST(fn_addr[zone][CMP_FUNC])(size))
 		++zone;
-	ret_val = NULL;
 	return REALLOC_FN_CAST(fn_addr[zone][REALLOC_FUNC])(fn_addr[zone], get_header_from_addr(addr), size);
 }
 
-void *myrealloc(void *addr, size_t size) {
-	printf("reallocating %p of size %ld to %ld\n",
-			addr,
-			GET_SIZE(get_header_from_addr(addr)),
-			size);
+void *realloc(void *addr, size_t size) {
 	void *new_addr;
 	chunk_info_t *header;
-	size_t used_size;
 
 	if (0 == size) {
-		printf("size is null -> I free and return NULL\n");
-		myfree(addr);
+		free(addr);
 		return NULL;
 	}
 
+	
 	header = get_header_from_addr(addr);
-	if (true == is_in_same_pool(GET_USE_SIZE(header), size)) {
-		printf("Same pool of size, try to smart realloc\n");
-		return same_pool_reallocation(addr, size);
-	}
+	
+	//if (true == is_in_same_pool(GET_USE_SIZE(header), size)) {
+		
+	//return same_pool_reallocation(addr, size);
+	
+//}
 
-	new_addr = mymalloc(size);
+	new_addr = malloc(size);
 	memcpy(new_addr, addr, GET_USE_SIZE(header));
-	myfree(addr);
+	free(addr);
 	return new_addr;
 }
 

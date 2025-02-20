@@ -5,7 +5,7 @@
 #include <errno.h>
 #include <stdlib.h>
 
-#include "mymalloc.h"
+#include "malloc.h"
 #include "type.h"
 #include "globals.h"
 
@@ -25,8 +25,6 @@ void desinitialiser() {
 }
 
 void init_malloc(void) {
-	void *casted;
-
 	memset(&arena_g, 0, sizeof(arena_t));
 	fast_allocation_nb = 0;
 
@@ -44,7 +42,7 @@ void init_malloc(void) {
 
 void clean_malloc(void) {
 	void *end_ptr = (void *)arena_g.pages_arr + arena_g.used_size;
-	for (page_info_t *ptr = arena_g.pages_arr ; ptr < end_ptr ; ++ptr) {
+	for (page_info_t *ptr = arena_g.pages_arr ; (void *)ptr < end_ptr ; ++ptr) {
 		munmap(ptr->ptr, ptr->length);
 	}
 	munmap(arena_g.pages_arr, arena_g.max_size);

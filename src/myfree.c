@@ -1,6 +1,6 @@
 #include "maskmanipulation.h"
 #include "globals.h"
-#include "mymalloc.h"
+#include "malloc.h"
 #include "size.h"
 #include "type.h"
 
@@ -12,12 +12,12 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
-static void free_zone(void ***fn_addr, void *addr, size_t size);
+static void free_zone(void ***fn_addr, void *addr);
 void unmap_zone(freed_chunk_t *header);
 void coalesce_chunk(freed_chunk_t *header);
 void coalescing_medium(void *header);
 
-void myfree(void *addr) {
+void free(void *addr) {
 	void *header;
 	size_t size;
 	static void **fn_addr[ZONE_NB][FUNCTION_NB_F] = {
@@ -53,7 +53,7 @@ void myfree(void *addr) {
 	}
 
 
-	free_zone(fn_addr[zone], header, size);
+	free_zone(fn_addr[zone], header);
 }
 
 void suppress_chunk(freed_chunk_t *to_suppress) {
@@ -83,15 +83,16 @@ void coalesce_chunk(freed_chunk_t *header) {
 }
 
 void unmap_zone(freed_chunk_t *header) {
+	printf("i unmap %p\n", header);
 	munmap((void *)header, GET_SIZE(header));
+	arena_g.free_big = NULL;
 }
 
-static void free_zone(void ***fn_addr, void *uncast_header, size_t size) {
+static void free_zone(void ***fn_addr, void *uncast_header) {
 	freed_chunk_t *header = uncast_header;
 	freed_chunk_t *link = *fn_addr[FREED_F];
 	freed_chunk_t *tmp;
 
-//display_free(*fn_addr[FREED_F]);
 	toggle_mask(uncast_header, CHUNK_IN_USE);
 	if (*fn_addr[FREED_F] == NULL) {
 		printf("first_free\n");

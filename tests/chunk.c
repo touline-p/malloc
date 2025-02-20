@@ -1,6 +1,6 @@
 #include "maskmanipulation.h"
 #include "utest.h"
-#include "mymalloc.h"
+#include "malloc.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -19,7 +19,7 @@ UTEST(chunk, malloc_chunk_is_set_for_tiny) {
 
 		dprintf(2,"pre malloc\n");
 		uint64_t size = sizes[index];
-		chunk_info_t *addr = (uint64_t*)mymalloc(size);
+		chunk_info_t *addr = (uint64_t*)malloc(size);
 		chunk_info_t *info = get_header_from_addr(addr);
 		dprintf(2,"post malloc\n");
 		ASSERT_EQ(0, GET_SIZE(info) % 16);
@@ -36,8 +36,8 @@ UTEST(chunk, size_allocation) {
 }
 
 UTEST(chunk, two_subsequent_alloc_are_diff) {
-	chunk_info_t *first = mymalloc(1);
-	chunk_info_t *second = mymalloc(2);
+	chunk_info_t *first = malloc(1);
+	chunk_info_t *second = malloc(2);
 
 	ASSERT_TRUE(first != second);
 }
@@ -45,8 +45,8 @@ UTEST(chunk, two_subsequent_alloc_are_diff) {
 
 
 UTEST_F(resetMalloc, used_size_is_set) {
-	void *first = mymalloc(123);
-	void *second = mymalloc(123);
+	void *first = malloc(123);
+	void *second = malloc(123);
 	void *header = get_header_from_addr(first);	
 	ASSERT_FALSE(mask_is_set(header, LAST_IN_ZONE));
 	ASSERT_EQ(NEXT_CHUNK_IN_ZONE(header), get_header_from_addr(second));

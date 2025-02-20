@@ -1,5 +1,5 @@
 #include "utest.h"
-#include "mymalloc.h"
+#include "malloc.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -43,15 +43,15 @@ UTEST_F_TEARDOWN(MaskTestFixture) {
 }
 
 UTEST_F(resetMalloc, tiny_top_is_not_in_use) {
-	char *str = mymalloc(TINY_TEST_SIZE);
+	char *str = malloc(TINY_TEST_SIZE);
 	chunk_info_t info = *(chunk_info_t *)arena_g.tiny;
 
-	myfree(str);
+	free(str);
 	ASSERT_FALSE(mask_is_set(&info, CHUNK_IN_USE));
 }
 
 UTEST_F(resetMalloc, allocated_chunk_is_in_use) {
-	chunk_info_t *malloced = mymalloc(TINY_TEST_SIZE);
+	chunk_info_t *malloced = malloc(TINY_TEST_SIZE);
 	dprintf(2, "%p\n", malloced);
 
 	malloced = get_header_from_addr(malloced);

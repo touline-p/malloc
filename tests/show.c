@@ -1,4 +1,4 @@
-#include "mymalloc.h"
+#include "malloc.h"
 #include "resetMalloc.h"
 #include "size.h"
 #include "utest.h"
@@ -7,9 +7,9 @@
 UTEST_MAIN() 
 
 UTEST_F(resetMalloc, show_basic) {
-	void *addr = mymalloc(TINY_TEST_SIZE);
-	addr = mymalloc(MEDIUM_TEST_SIZE);
-	addr = mymalloc(LARGE_TEST_SIZE);
+	void *addr = malloc(TINY_TEST_SIZE);
+	addr = malloc(MEDIUM_TEST_SIZE);
+	addr = malloc(LARGE_TEST_SIZE);
 
 	show_alloc_mem();
 }

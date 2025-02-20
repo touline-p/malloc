@@ -2,12 +2,13 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <unistd.h>
-#include "mymalloc.h"
+#include "malloc.h"
 #include "globals.h"
 #include "type.h"
 
 int realloc_page_arr_if_necessary(void);
 void insert_page_in_global_arr(void *page, size_t size);
+void *mmap_call_no_index(void *proximity, size_t length);
 
 int index_page(void *page, size_t size) {
 	printf("pre realloc if necessary\n");
@@ -21,13 +22,12 @@ int index_page(void *page, size_t size) {
 
 int realloc_page_arr_if_necessary(void) {
 	void *new_page;
-	void *casted;
 
 	if (arena_g.max_size - arena_g.used_size> sizeof(page_info_t)) {
 		return 0;
 	}
 	arena_g.page_nb++;
-	new_page = mmap_call(arena_g.pages_arr, arena_g.page_nb * sysconf(_SC_PAGESIZE));
+	new_page = mmap_call_no_index(arena_g.pages_arr, arena_g.page_nb * sysconf(_SC_PAGESIZE));
 	if (MAP_FAILED == new_page)
 		return (-1);
 	if (new_page != arena_g.pages_arr) {

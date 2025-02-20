@@ -26,7 +26,7 @@
 
 void toggle_mask(void *addr, uint64_t mask);
 bool mask_is_set(void *addr, uint64_t mask); 
-uint64_t *get_header_from_addr(uint64_t *header);
-uint64_t *get_addr_from_header(uint64_t *addr);
+uint64_t *get_header_from_addr(void *header);
+uint64_t *get_addr_from_header(void *addr);
 
 #endif

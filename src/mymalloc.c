@@ -8,7 +8,7 @@
 #include <strings.h>
 #include <unistd.h>
 
-#include "mymalloc.h"
+#include "malloc.h"
 #include "size.h"
 #include "type.h"
 #include "maskmanipulation.h"
@@ -62,9 +62,11 @@ void *get_next_freed(freed_chunk_t **freed_chunks_ptr, size_t size, size_t size_
 		tmp_ptr = tmp_ptr->next;
 	}
 	if (NULL == tmp_ptr) {
+		printf("not found cause too small\n");
 		return NULL;
 	}
 
+	// ici on a le probleme de l'utilisation du premier chainon de la chaine de free
 	tmp = *tmp_ptr;
 	ret_val = allocate_memory((void **)&tmp_ptr, size, size_min);
 	if (tmp_ptr == NULL) {
@@ -72,7 +74,18 @@ void *get_next_freed(freed_chunk_t **freed_chunks_ptr, size_t size, size_t size_
 			tmp.next->prev = tmp.prev;
 		if (tmp.prev)
 			tmp.prev->next = tmp.next;
+	} else {
+		if (tmp.next)
+			tmp.next->prev = tmp_ptr;
+		if (tmp.prev)
+			tmp.prev->next = tmp_ptr;
 	}
+	printf("freed_chunk_tr = %p : ret_val %p\n", *freed_chunks_ptr, ret_val);
+	printf("freed_chunk_tr = %p : ret_val %p\n", *freed_chunks_ptr, ret_val + sizeof(chunk_info_t));
+	if (*freed_chunks_ptr == ret_val + sizeof(chunk_info_t)) {
+		*freed_chunks_ptr = NULL;
+	}
+	printf("fast_allocated\n");
 	fast_allocation_nb += 1;
 	return ret_val;
 }
@@ -80,34 +93,40 @@ void *get_next_freed(freed_chunk_t **freed_chunks_ptr, size_t size, size_t size_
 void *group_malloc(void ***zone, size_t size) {
 	void *ret_val;
 
-	printf("pre free\n");
+	printf("look a freed\n");
+	printf("freed = %p\n", *zone[FREED]);
 	if (*zone[FREED] != NULL &&
-			NULL != (ret_val = get_next_freed(zone[FREED], size, (size_t)zone[SIZE_MIN_ALLOC]))) {
+			NULL != (ret_val = get_next_freed(((freed_chunk_t **)zone[FREED]), size, (size_t)zone[SIZE_MIN_ALLOC]))) {
 		return ret_val;
 	}
-	printf("no free found\n");
-	if (*zone[TOP] == NULL && !ALLOC_CAST(zone[ALLOCATION_FN])(zone[TOP], (size_t)zone[SIZE_MAX_ALLOC], size))
+	printf("look at top\n");
+	printf("top = %p\n", *zone[TOP]);
+	if (*zone[TOP] == NULL && printf("reallocating top\n") && !ALLOC_CAST(zone[ALLOCATION_FN])(zone[TOP], (size_t)zone[SIZE_MAX_ALLOC], size))
 		return NULL;
-	printf("alloca fn done\n");
 	if (size + SIZE_CHUNK_HEADER > GET_SIZE(*zone[TOP])) {
-		myfree(*zone[TOP]);
+		free(*zone[TOP]);
 		*zone[TOP] = NULL;
 	}
 	if (*zone[TOP] == NULL && !ALLOC_CAST(zone[ALLOCATION_FN])(zone[TOP], (size_t)zone[SIZE_MAX_ALLOC], size))
 		return NULL;
 
-	printf("pre allocate_memory\n");
+	printf("allocate_memory\n");
 	ret_val = allocate_memory(zone[TOP], size, (size_t)zone[SIZE_MIN_ALLOC]);
-	printf("post allocate_memory\n");
+	printf("val %p\n", ret_val);
 
-	void *header = get_header_from_addr(ret_val);
 	return ret_val;
 }
 
+size_t ft_strlen(char *str) {
+	char *ptr = str;
+
+	while (*ptr) ptr++;
+	return ptr - str;
+}
 
 
-void *mymalloc(uint64_t size) {
-	void *ret_val;
+void *malloc(uint64_t size) {
+	static size_t nb_alloc = 0;
 	static void **fn_addr[ZONE_NB][ZONE_FUNCTION_NB] = {
 		{
 			(void *)&is_tiny,
@@ -141,14 +160,15 @@ void *mymalloc(uint64_t size) {
 		},
 	};
 	enum zone_e zone;
+	static int arr[ZONE_NB] = {};
+	printf("I try to alloc %d\n", size);
 
 	if (size == 0)
 		return NULL;
 	zone = TINY;
-	ret_val = NULL;
 	while (false == COMP_CAST(fn_addr[zone][COMPARAISON])(size))
 		++zone;
-	printf("zone : %d\n", zone);
+	printf("zone is %d\n", zone);
 	return group_malloc(fn_addr[zone++], size);
 }
 
