@@ -167,6 +167,7 @@ void *malloc(uint64_t size) {
 	};
 	enum zone_e zone;
 	static int arr[ZONE_NB] = {};
+	printf("arena page count %d\n", arena_g.page_nb);
 	printf("%p\n", arena_g.medium);
 	printf("I try to alloc %d -> ", size);
 

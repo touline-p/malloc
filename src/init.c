@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <sys/mman.h>
 #include <unistd.h>
 #include <errno.h>
@@ -21,6 +22,7 @@ void initialiser() {
 
 __attribute__((destructor)) 
 void desinitialiser() {
+	clean_malloc()
 	;
 }
 
@@ -35,18 +37,13 @@ void init_malloc(void) {
 	if (MAP_FAILED == arena_g.pages_arr) {
 		exit(errno);
 	}
-
-	arena_g.max_size = size;
-	arena_g.used_size = 0;
 }
 
 void clean_malloc(void) {
-	void *end_ptr = (void *)arena_g.pages_arr + arena_g.used_size;
-	for (page_info_t *ptr = arena_g.pages_arr ; (void *)ptr < end_ptr ; ++ptr) {
-		munmap(ptr->ptr, ptr->length);
+	size_t page_nb = arena_g.page_nb;
+	for (size_t index = 0; index < page_nb ; index++) {
+		munmap(arena_g.pages_arr[index].ptr, arena_g.pages_arr[index].length);
 	}
-	munmap(arena_g.pages_arr, arena_g.max_size);
-	arena_g.used_size = 0;
+	munmap(arena_g.pages_arr, realloc_page_arr_if_necessary());
 	arena_g.pages_arr = NULL;
-	arena_g.max_size = 0;
 }

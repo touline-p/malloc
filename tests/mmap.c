@@ -26,7 +26,7 @@ UTEST_F(resetMalloc, malloc_return_readable_and_writable) {
 }
 
 size_t allocated_page(void) {
-	return arena_g.used_size / sizeof(page_info_t);
+	return realloc_page_arr_if_necessary();
 }
 
 

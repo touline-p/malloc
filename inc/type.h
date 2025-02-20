@@ -46,8 +46,6 @@ typedef struct arena_s {
 	void *big;
 	void *free_big;
 	page_info_t *pages_arr;
-	size_t max_size;
-	size_t used_size;
 	size_t page_nb;
 } arena_t;
 

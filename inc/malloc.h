@@ -32,6 +32,7 @@ void print_info_from_addr(chunk_info_t *addr);
 size_t cached_sysconf();
 void display_indexed_page();
 
+int realloc_page_arr_if_necessary(void);
 
 # define IGNORE_ARGUMENTS 0
 
