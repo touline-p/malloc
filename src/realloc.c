@@ -23,7 +23,6 @@ enum pool_function_e {
 
 void *return_same(void ***zone_data, void *header, size_t size) {
 	printf("Return _same for group : %s\n", (char *)zone_data[MESSAGE_P]);
-	SET_USE_SIZE(header, size);
 	return get_addr_from_header(header);
 }
 
@@ -75,26 +74,34 @@ void *same_pool_reallocation(void *addr, size_t size) {
 }
 
 void *realloc(void *addr, size_t size) {
+	printf("--REALLOC--\n");
 	void *new_addr;
 	chunk_info_t *header;
+	size_t min;
 
 	if (0 == size) {
 		free(addr);
 		return NULL;
 	}
 
-	
 	header = get_header_from_addr(addr);
+
+	min = (size < get_size(header)) * size + (get_size(header) < size) * get_size(header);
+	printf("size : %d objectiv : %d : min : %d\n", get_size(header), size, min);
+
 	
-	//if (true == is_in_same_pool(GET_USE_SIZE(header), size)) {
+	
 		
 	//return same_pool_reallocation(addr, size);
 	
-//}
 
 	new_addr = malloc(size);
-	memcpy(new_addr, addr, GET_USE_SIZE(header));
+	display_free(arena_g.free_medium);
+	printf("new addr in realloc is created -- ");
+	memcpy(new_addr, addr, min);
+	printf("copied -- ");
 	free(addr);
+	printf("freed\n\n\n");
 	return new_addr;
 }
 

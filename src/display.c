@@ -9,17 +9,16 @@ void display_arena(void) {
 	printf("top -> %12p freed -> %12p\n", arena_g.tiny, arena_g.free_tiny);
 	printf("MEDIUM\n");
 	printf("top -> %12p freed -> %12p\n", arena_g.medium, arena_g.free_medium);
-	if (arena_g.medium)
-		printf("top size : %lu\n", GET_SIZE(arena_g.medium));
 	printf("LARGE\n");
 	printf("top -> %12p freed -> %12p\n", arena_g.big, arena_g.free_big);
 }
 
 void display_free(freed_chunk_t *link) {
+	size_t index = 0;
 	printf("display_free :\n");
-//	size_t index = 0;
 	while (NULL != link) {
-//		printf("%d %p size : %5d\n", index++, link, GET_SIZE(link));
+		printf("index : %d|ptr : %p|size:%5d|\n", index++, link, get_size(link));
 		link = link->next;
 	}
+	printf("\n\n");
 }

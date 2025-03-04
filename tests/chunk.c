@@ -22,7 +22,7 @@ UTEST(chunk, malloc_chunk_is_set_for_tiny) {
 		chunk_info_t *addr = (uint64_t*)malloc(size);
 		chunk_info_t *info = get_header_from_addr(addr);
 		dprintf(2,"post malloc\n");
-		ASSERT_EQ(0, GET_SIZE(info) % 16);
+		ASSERT_EQ(0, get_size(info) % 16);
 	}
 	dprintf(2, "le free");
 }

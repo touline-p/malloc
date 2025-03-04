@@ -3,6 +3,7 @@
 
 # include "stddef.h"
 # include "stdint.h"
+#include <stdint.h>
 
 typedef struct chain_s chain_t;
 struct chain_s {
@@ -10,13 +11,15 @@ struct chain_s {
 	void *chunk;
 };
 
-typedef uint64_t chunk_info_t;
+typedef struct chunk_info_s {
+	size_t size;
+	size_t flags;
+} chunk_info_t;
 
 typedef struct freed_chunk_s freed_chunk_t;
 
 struct freed_chunk_s {
-	chunk_info_t chunk_info_first;
-	chunk_info_t chunk_info_second;
+	chunk_info_t infos;
 	freed_chunk_t *next;
 	freed_chunk_t *prev;
 };

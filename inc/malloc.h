@@ -9,9 +9,11 @@
 # define DEBUG(x) write(OUTPUT_ERR_FD, x, ft_strlen(x));
 # define DEBUG_char(x) { char c = '0' + x; write(OUTPUT_ERR_FD, &c, 1) ; write(OUTPUT_ERR_FD, "\n", 1); }
 # define LINE write(OUTPUT_ERR_FD, "\n", 1);
+
 void *malloc(size_t size);
 void *mmap_call(void *proximity, size_t length);
 int index_page(void *addr, size_t length);
+void desindex_page(void *header, size_t size);
 void free(void *addr);
 void *realloc(void *addr, size_t size);
 int try_init_page(void **to_init, size_t size);
@@ -26,7 +28,7 @@ void clean_malloc(void);
 void display_arena(void);
 void display_free(freed_chunk_t *link);
 
-void show_alloc_mem(void);
+extern void show_alloc_mem(void);
 void print_chunk_info_t(chunk_info_t *chunk);
 void print_info_from_addr(chunk_info_t *addr);
 size_t cached_sysconf();

@@ -17,7 +17,18 @@ void unmap_zone(freed_chunk_t *header);
 void coalesce_chunk(freed_chunk_t *header);
 void coalescing_medium(void *header);
 
+void print_arena() {
+	printf("tiny top %p free %p\n", arena_g.tiny, arena_g.free_tiny);
+	printf("mid  top %p free %p\n", arena_g.medium, arena_g.free_medium);
+	printf("big  top %p free %p\n", arena_g.big, arena_g.free_big);
+}
+
 void free(void *addr) {
+
+	printf("\n\n--FREE-- : %p\n", addr);
+	print_chunk_info_t(get_header_from_addr(addr));
+
+
 	void *header;
 	size_t size;
 	static void **fn_addr[ZONE_NB][FUNCTION_NB_F] = {
@@ -42,18 +53,27 @@ void free(void *addr) {
 	};
 	enum zone_e zone = TINY;
 
-	if (addr == NULL)
-		return ;
+	if (addr == NULL) {printf("NULL inputed so return\n"); return ;}
 	header = get_header_from_addr(addr);
-	size = GET_USE_SIZE(header);
+	size = get_size(header);
 	NEXT_FREED_CHUNK(header) = NULL;
+
 
 	while (false == COMP_CAST(fn_addr[zone][COMPARAISON])(size)){
 		zone++;
 	}
 
+	printf("free addr : %p : header : %p len : %d zone : %d\n", addr, header, size, zone);
+
 
 	free_zone(fn_addr[zone], header);
+
+	printf("post free arena :\n");
+	print_arena();
+	printf("tiny free chained list :\n");
+	display_free(*fn_addr[TINY][FREED]);
+	printf("medium free chained list :\n");
+	display_free(*fn_addr[MEDIUM][FREED]);
 }
 
 void suppress_chunk(freed_chunk_t *to_suppress) {
@@ -74,17 +94,23 @@ void coalescing_medium(void *addr) {
 void coalesce_chunk(freed_chunk_t *header) {
 	size_t new_size;
 
-	if (GET_SIZE(header) + (void *)header == header->next) {
-		new_size = GET_SIZE(header) + GET_SIZE(header->next);
-		ASSIGN_SIZE((chunk_info_t*)header, &new_size);
+	printf("coalescing %p\n", header);
+	if (get_size(header) + (void *)header == header->next) {
+		if (mask_is_set(header->next, LAST_IN_ZONE))
+			toggle_mask(header, LAST_IN_ZONE);
+		printf("really coalescing %p\n", header);
+		new_size = get_size(header) + get_size(header->next);
+		set_size((chunk_info_t*)header, new_size);
 		suppress_chunk(header->next);
+		header->next = ((void *)header) + new_size;
 		
 	}
 }
 
 void unmap_zone(freed_chunk_t *header) {
 	printf("i unmap %p\n", header);
-	munmap((void *)header, GET_SIZE(header));
+	desindex_page(header, get_size(header));
+	munmap((void *)header, get_size(header));
 	arena_g.free_big = NULL;
 }
 
@@ -93,7 +119,10 @@ static void free_zone(void ***fn_addr, void *uncast_header) {
 	freed_chunk_t *link = *fn_addr[FREED_F];
 	freed_chunk_t *tmp;
 
+	printf("--- free zone ---\n");
+	show_alloc_mem();
 	toggle_mask(uncast_header, CHUNK_IN_USE);
+	show_alloc_mem();
 	if (*fn_addr[FREED_F] == NULL) {
 		printf("first_free\n");
 		*fn_addr[FREED_F] = header;
@@ -117,7 +146,11 @@ static void free_zone(void ***fn_addr, void *uncast_header) {
 		if (NULL != tmp)
 			tmp->prev = header;
 	}
+	printf("pre specific function\n");
+	show_alloc_mem();
 	if (fn_addr[POST_FREE_FN_F]) {
 		POST_FREE_CAST(fn_addr[POST_FREE_FN_F])(header);
 	}
+	printf("post specific function\n");
+	show_alloc_mem();
 }

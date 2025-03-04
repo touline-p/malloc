@@ -23,40 +23,34 @@ int allocate_memory_pool(void **to_init, size_t size);
 int allocate_unique_zone(void **to_init, size_t max_size, size_t size);
 
 void *allocate_memory(void **top_ptr, size_t size, size_t size_min) {
-	printf("allocate_memory -> top : %p\n", *top_ptr);
 	chunk_info_t * disponible_chunk;
-	size_t used_size = size;
 	size_t disponible_chunk_size;
+	bool top_was_last = mask_is_set(*top_ptr, LAST_IN_ZONE);
+	printf("given to allocate_memory %p\n", *top_ptr);
 
-	size = size_allocation(size);
 	size += SIZE_CHUNK_HEADER;
+	size = size_allocation(size);
 
 	disponible_chunk = *top_ptr;
-	disponible_chunk_size = GET_SIZE(disponible_chunk);
+	disponible_chunk_size = get_size(disponible_chunk);
 	if ((disponible_chunk_size - size) < (size_min)) {
-		printf("je passe la\n\n\n");
 		*top_ptr = NULL;
+		printf("i give all of the chunk\n");
 		toggle_mask(disponible_chunk, CHUNK_IN_USE);
-		SET_USE_SIZE(disponible_chunk, size);
 		return get_addr_from_header(disponible_chunk);
 	}
 
 	toggle_mask(disponible_chunk, CHUNK_IN_USE);
-	toggle_mask(disponible_chunk, LAST_IN_ZONE);
-	ASSIGN_SIZE(disponible_chunk, &size);
-	SET_USE_SIZE(disponible_chunk, used_size);
+	if (top_was_last)
+		toggle_mask(disponible_chunk, LAST_IN_ZONE);
+	set_size(disponible_chunk, size);
 
-	*top_ptr = *top_ptr + size;
-	**(chunk_info_t **)top_ptr = disponible_chunk_size - size;
 	disponible_chunk_size -= size;
-	ASSIGN_SIZE(*(chunk_info_t **)top_ptr, &disponible_chunk_size);
-	toggle_mask(*top_ptr, LAST_IN_ZONE);
-
-	printf("--RET--");
-	print_chunk_info_t(disponible_chunk);
-	printf("--TOP--");
-	print_chunk_info_t(*top_ptr);
-
+	*top_ptr = (*top_ptr) + size;
+	set_size(*(chunk_info_t **)top_ptr, disponible_chunk_size);
+	if (top_was_last)
+		toggle_mask(*top_ptr, LAST_IN_ZONE);
+	printf("i partition the chunk\n");
 	return get_addr_from_header(disponible_chunk);
 }
 
@@ -66,34 +60,45 @@ void *get_next_freed(freed_chunk_t **freed_chunks_ptr, size_t size, size_t size_
 	freed_chunk_t *tmp_ptr;
 	freed_chunk_t tmp;
 	void *ret_val;
+	void *to_init;
+	void *header;
 
 	tmp_ptr = *freed_chunks_ptr ;
-	while (NULL != tmp_ptr && GET_SIZE(tmp_ptr) < size) {
+	while (NULL != tmp_ptr && get_size(tmp_ptr) < size) {
 		tmp_ptr = tmp_ptr->next;
 	}
 	if (NULL == tmp_ptr) {
-		printf("not found cause too small\n");
 		return NULL;
 	}
-
-	// ici on a le probleme de l'utilisation du premier chainon de la chaine de free
+	printf("getting next freed\n");
+	show_alloc_mem();
 	tmp = *tmp_ptr;
-	ret_val = allocate_memory((void **)&tmp_ptr, size, size_min);
-	if (tmp_ptr == NULL) {
+	to_init = tmp_ptr;
+	ret_val = allocate_memory(&to_init, size, size_min);
+	header = get_header_from_addr(ret_val);
+	printf("post allocate memory\n");
+	show_alloc_mem();
+	if (to_init == NULL) {
 		if (tmp.next)
 			tmp.next->prev = tmp.prev;
 		if (tmp.prev)
 			tmp.prev->next = tmp.next;
 	} else {
 		if (tmp.next)
-			tmp.next->prev = tmp_ptr;
+			tmp.next->prev = to_init;
 		if (tmp.prev)
-			tmp.prev->next = tmp_ptr;
+			tmp.prev->next = to_init;
+		tmp_ptr = to_init;
+		tmp_ptr->next = tmp.next;
+		tmp_ptr->prev = tmp.prev;
 	}
-	if (*freed_chunks_ptr == ret_val + sizeof(chunk_info_t)) {
-		*freed_chunks_ptr = NULL;
+	printf("free a %p et ret %p\n", *freed_chunks_ptr, get_header_from_addr(ret_val));
+	show_alloc_mem();
+	if (get_addr_from_header(*freed_chunks_ptr) == ret_val) {
+		printf("check diff %d\n", to_init - (void *)*freed_chunks_ptr);
+		*freed_chunks_ptr = to_init;
+		printf("premier chainon -> global set a ->%p\n", *freed_chunks_ptr);
 	}
-	printf("fast_allocated\n");
 	fast_allocation_nb += 1;
 	return ret_val;
 }
@@ -102,24 +107,30 @@ void *get_next_freed(freed_chunk_t **freed_chunks_ptr, size_t size, size_t size_
 void *group_malloc(void ***zone, size_t size) {
 	void *ret_val;
 
-	printf("freed = %p :: top = %p\n", *zone[FREED], *zone[TOP]);
+	printf("top : %p, free : %p\n", *zone[TOP], *zone[FREED]);
 	if (*zone[FREED] != NULL &&
 			NULL != (ret_val = get_next_freed(((freed_chunk_t **)zone[FREED]), size, (size_t)zone[SIZE_MIN_ALLOC]))) {
-		printf("-FREE--");
-		print_chunk_info_t(get_header_from_addr(ret_val));
+		printf("found in free\n");
 		return ret_val;
-	}
-	if (*zone[TOP] == NULL && printf("reallocating top\n") && !ALLOC_CAST(zone[ALLOCATION_FN])(zone[TOP], (size_t)zone[SIZE_MAX_ALLOC], size))
-		return NULL;
-	if (size + SIZE_CHUNK_HEADER > GET_SIZE(*zone[TOP])) {
-		printf("Size is not enough so i free\n");
-		free(*zone[TOP]);
-		*zone[TOP] = NULL;
 	}
 	if (*zone[TOP] == NULL && !ALLOC_CAST(zone[ALLOCATION_FN])(zone[TOP], (size_t)zone[SIZE_MAX_ALLOC], size))
 		return NULL;
+	printf("post process top: %p, size %d\n", *zone[TOP], get_size(*zone[TOP]));
+	if (size + SIZE_CHUNK_HEADER > get_size(*zone[TOP])) {
+		printf("zone is not enough i free");
+		free(get_addr_from_header(*zone[TOP]));
+		*zone[TOP] = NULL;
+	}
+	else 
+		printf("zone is enoughly big\n");
+	if (*zone[TOP] == NULL && !ALLOC_CAST(zone[ALLOCATION_FN])(zone[TOP], (size_t)zone[SIZE_MAX_ALLOC], size))
+		return NULL;
 
+	printf("pre allocate top: %p, size %d\n", *zone[TOP], get_size(*zone[TOP]));
 	ret_val = allocate_memory(zone[TOP], size, (size_t)zone[SIZE_MIN_ALLOC]);
+	if (NULL == *zone[TOP])
+		return ret_val;
+	printf("post allocate top: %p, size %d\n", *zone[TOP], get_size(*zone[TOP]));
 	return ret_val;
 }
 
@@ -132,6 +143,7 @@ size_t ft_strlen(char *str) {
 
 
 void *malloc(uint64_t size) {
+	printf("\n--MALLOC--\nAllocating %d -- ", size);
 	static size_t nb_alloc = 0;
 	static void **fn_addr[ZONE_NB][ZONE_FUNCTION_NB] = {
 		{
@@ -166,20 +178,17 @@ void *malloc(uint64_t size) {
 		},
 	};
 	enum zone_e zone;
-	static int arr[ZONE_NB] = {};
-	printf("arena page count %d\n", arena_g.page_nb);
-	printf("%p\n", arena_g.medium);
-	printf("I try to alloc %d -> ", size);
 
 	if (size == 0)
 		return NULL;
 	zone = TINY;
-	while (false == COMP_CAST(fn_addr[zone][COMPARAISON])(size))
+	while (false == COMP_CAST(fn_addr[zone][COMPARAISON])(size + SIZE_CHUNK_HEADER))
 		++zone;
-	printf("zone is %d ->\n", zone);
+	printf("zone is %d\n", zone);
 	void *ret_val = group_malloc(fn_addr[zone++], size);
-//	show_alloc_mem();
-	printf("%p\n\n\n", ret_val);
+	display_arena();
+	show_alloc_mem();
+	printf("Ret addr -> %p\n", ret_val);
 	return ret_val;
 }
 

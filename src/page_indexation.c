@@ -10,15 +10,23 @@
 int realloc_page_arr_if_necessary(void);
 void insert_page_in_global_arr(void *page, size_t size);
 void *mmap_call_no_index(void *proximity, size_t length);
+void suppress_page_out_off_global_arr(void *page);
 
 int index_page(void *page, size_t size) {
-	printf("youpi");
+	printf("index page called\n");
+	printf("checking reallocation\n");
 	realloc_page_arr_if_necessary();
-	printf("not going anywhere");
+	printf("inserti in global arr\n");
 	insert_page_in_global_arr(page, size);
-	printf("this was fine end indexpage end\n");
+	printf("incrementing page nb\n");
 	arena_g.page_nb++;
 	return 0;
+}
+
+void desindex_page(void *page, size_t size) {
+	(void)size;
+	suppress_page_out_off_global_arr(page);
+	arena_g.page_nb--;
 }
 
 int realloc_page_arr_if_necessary(void) {
@@ -26,22 +34,30 @@ int realloc_page_arr_if_necessary(void) {
 	void *new_page;
 	size_t size_page = sysconf(_SC_PAGESIZE);
 
-	printf("size index : %d nb page : %d -> used %d\n", size_index, arena_g.page_nb, arena_g.page_nb * sizeof(page_info_t));
+	printf("it s fine\n");
 	if (size_index - (arena_g.page_nb * sizeof(page_info_t)) > sizeof(page_info_t)) {
+		printf("it s fine\n");
 		return size_index;
 	}
-	printf("\nnew page indexation\n");
-	size_page = sysconf(_SC_PAGESIZE);
-	new_page = mmap_call_no_index(arena_g.pages_arr, size_index + size_page);
-	if (MAP_FAILED == new_page)
+
+	printf("allocating a new page for indexation purposes\n");
+
+	new_page = mmap(arena_g.pages_arr, size_index + size_page, PROT_WRITE | PROT_READ, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+	printf("new addr allocated is : %p\n", new_page);
+	if (MAP_FAILED == new_page) {
+		printf("FATAL : map failed\n");
 		return (0);
+	}
 	if (new_page != arena_g.pages_arr) {
-		printf("this\n");
-		memmove(new_page,  arena_g.pages_arr, size_page);
+		printf("it's different\n");
+		printf("memmove from %p to %p : %d bytes\n", arena_g.pages_arr, new_page, size_page);
+		memmove(new_page,  arena_g.pages_arr, size_index);
+		printf("memeove done\n");
 		munmap(arena_g.pages_arr, size_page);
 		arena_g.pages_arr = new_page;
+	} else {
+		printf("it s not\n");
 	}
-	printf("this is fine\n");
 	size_index = size_index + size_page;
 	return size_index;
 }
@@ -53,15 +69,24 @@ void insert_page_in_global_arr(void *to_insert, size_t size_to_insert) {
 
 	dst = arena_g.pages_arr;
 	index = 0;
-	while (index < arena_g.page_nb && arena_g.pages_arr[index].ptr > to_insert) {
+	while (index < arena_g.page_nb && arena_g.pages_arr[index].ptr < to_insert) {
 		index++;
 	}
-	printf("going out\n\n:");
-	printf("%p -> %p, size %d\n", arena_g.pages_arr + index, arena_g.pages_arr + index + 1, (arena_g.page_nb - index) * sizeof(page_info_t));
 	memmove(arena_g.pages_arr + index + 1, arena_g.pages_arr + index, (arena_g.page_nb - index) * sizeof(page_info_t));
-	printf("post mem move\n\n:");
 	arena_g.pages_arr[index].ptr = to_insert;
-	printf("post mem move\n\n:");
 	arena_g.pages_arr[index].length = size_to_insert;
-	printf("post mem move\n\n:");
+}
+
+
+void suppress_page_out_off_global_arr(void *page) {
+	page_info_t *to_suppr;
+	size_t index;
+
+	to_suppr = arena_g.pages_arr;
+	index = 0;
+	while (to_suppr[index].ptr != page) {
+		index++;
+	}
+	memmove(arena_g.pages_arr + index, arena_g.pages_arr + index + 1, (arena_g.page_nb - index) * sizeof(page_info_t));
+
 }

@@ -23,7 +23,7 @@ char *zone_str(enum zone_e zone) {
 
 void print_chunk_info_t(chunk_info_t *chunk) {
 	printf("chunk addr : %10p -- ", chunk);
-	printf("size: %10d, used_size: %10d -- ", GET_SIZE(chunk), GET_USE_SIZE(chunk));
+	printf("size: %10d -- ", get_size(chunk));
 	printf("|in use %d | first in zone %d | last in zone %d |\n", mask_is_set(chunk, CHUNK_IN_USE), mask_is_set(chunk, FIRST_IN_ZONE), mask_is_set(chunk, LAST_IN_ZONE));
 }
 
@@ -62,7 +62,7 @@ void show_page_mem(page_info_t ptr) {
 	void *tmp = ptr.ptr;
 	while (mask_is_set(tmp, LAST_IN_ZONE) == false) {
 		print_chunk_info_t(tmp);
-		tmp += GET_SIZE(tmp);
+		tmp += get_size(tmp);
 	}
 	print_chunk_info_t(tmp);
 }
@@ -84,7 +84,7 @@ void display_indexed_page() {
 	page_info_t ptr;
 	while (nb_page < arena_g.page_nb) {
 		ptr = arena_g.pages_arr[nb_page];
-		printf("len %d, addr %p -",  ptr.length, ptr.ptr);
+		printf("addr %p -- len %d\n",  ptr.ptr, ptr.length);
 		nb_page++;
 	}
 	printf("end indexed print\n");
