@@ -64,20 +64,16 @@ void *get_next_freed(freed_chunk_t **freed_chunks_ptr, size_t size, size_t size_
 	void *header;
 
 	tmp_ptr = *freed_chunks_ptr ;
-	while (NULL != tmp_ptr && get_size(tmp_ptr) < size) {
+	while (NULL != tmp_ptr && get_size(tmp_ptr) < size + SIZE_CHUNK_HEADER) {
 		tmp_ptr = tmp_ptr->next;
 	}
 	if (NULL == tmp_ptr) {
 		return NULL;
 	}
-	printf("getting next freed\n");
-	show_alloc_mem();
 	tmp = *tmp_ptr;
 	to_init = tmp_ptr;
 	ret_val = allocate_memory(&to_init, size, size_min);
 	header = get_header_from_addr(ret_val);
-	printf("post allocate memory\n");
-	show_alloc_mem();
 	if (to_init == NULL) {
 		if (tmp.next)
 			tmp.next->prev = tmp.prev;
