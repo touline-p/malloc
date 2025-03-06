@@ -12,9 +12,15 @@ include(build/lib_sources.cmake)
 set (INC inc)
 
 add_library(mymalloc SHARED ${SOURCES})
-
 target_include_directories(mymalloc PUBLIC ${INC})
 target_compile_options(mymalloc PRIVATE -g3)
+
+include(build/printf_sources.cmake)
+
+add_library(printf_ft SHARED ${PRINTF_SOURCES})
+target_include_directories(printf_ft PUBLIC ${INC})
+target_compile_options(printf_ft PRIVATE -g3)
+
 #---------------------------------------------------------------------------------------#
 
 include(build/tests_sources.cmake)
