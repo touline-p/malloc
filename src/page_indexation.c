@@ -12,7 +12,20 @@ void insert_page_in_global_arr(void *page, size_t size);
 void *mmap_call_no_index(void *proximity, size_t length);
 void suppress_page_out_off_global_arr(void *page);
 
+void display_pages() {
+	size_t index;
+
+	index = 0;
+	printf("                    --------page indexation\n");
+	while (index < arena_g.page_nb) {
+		printf("| %d : %p : %d ", index, arena_g.pages_arr[index].ptr, arena_g.pages_arr[index].length);
+		index++;
+	}
+	printf("|\n");
+}
+
 int index_page(void *page, size_t size) {
+	display_pages();
 	printf("index page called\n");
 	printf("checking reallocation\n");
 	realloc_page_arr_if_necessary();
@@ -20,6 +33,7 @@ int index_page(void *page, size_t size) {
 	insert_page_in_global_arr(page, size);
 	printf("incrementing page nb\n");
 	arena_g.page_nb++;
+	display_pages();
 	return 0;
 }
 
