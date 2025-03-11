@@ -34,11 +34,8 @@
 # define PRINTF_FT_LIB "libprintf_ft.so"
 # define PRINTF_FT_NAME "printf_ft"
 
-# define DEBUG(x) write(OUTPUT_ERR_FD, x, strlen(x));
-# define DEBUG_char(x) { char c = '0' + x; write(OUTPUT_ERR_FD, &c, 1) ; write(OUTPUT_ERR_FD, "\n", 1); }
-# define LINE write(OUTPUT_ERR_FD, "\n", 1);
 
-extern int ft_printf(const char *format, ...);
+extern int printf_ft(const char *format, ...);
 
 const char *ft_print_param(const char *format, va_list prms);
 

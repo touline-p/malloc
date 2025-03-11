@@ -1,9 +1,17 @@
 #ifndef DEBUG_H
 
-#define DEBUG_H
+# define DEBUG_H
 
-#include "string.h"
+#define DEBUG 1
 
+#ifdef DEBUG
+# define DEBUG(x) x
+#else
+# define DEBUG(x) ;
+#endif
+
+
+/*
 #define QUOTE(x) #x
 #define STRINGIFY(x) QUOTE(x)
 #define CONCATENATE_HELPER(a, b, c, d) a b c d
@@ -22,6 +30,7 @@ char *file_name(char *filename) {return strrchr(filename, '/');}
 #define INFO(format, ...)  TRACE(format, "INFO ", __VA_ARGS__)
 #define WARN(format, ...)  TRACE(format, "WARN ", __VA_ARGS__)
 #define ERROR(format, ...) TRACE(format, "ERROR", __VA_ARGS__)
+*/
 
 #endif // DEBUG_H
 

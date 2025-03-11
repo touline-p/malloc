@@ -41,13 +41,10 @@ struct page_info_s {
 
 typedef struct page_chain_s page_chain_t;
 
+
 typedef struct arena_s {
-	void *tiny;
-	void *free_tiny;
-	void *medium;
-	void *free_medium;
-	void *big;
-	void *free_big;
+	freed_chunk_t *tiny_list;
+	freed_chunk_t *medium_list;
 	page_info_t *pages_arr;
 	size_t page_nb;
 } arena_t;
@@ -59,11 +56,6 @@ typedef struct page_s {
 
 
 
-
-# define FIRST_POOL TINY
-# define POOL_NB MEDIUM + 1
-
-# define FONCTIONAL_NUMBER 18
 
 # define COMP_CAST(x) ((bool (*) (uint64_t))(x))
 # define ALLOC_CAST(x) ((int (*) (void **, size_t, size_t))(x))
