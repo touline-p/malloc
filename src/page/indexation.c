@@ -24,17 +24,14 @@ void display_pages() {
 }
 
 int index_page(void *page, size_t size) {
-	printf_ft("index_page :");
 	realloc_page_arr_if_necessary();
 	insert_page_in_global_arr(page, size);
 	arena_g.page_nb++;
-	printf_ft("nb_page : %d -> desindex\n", arena_g.page_nb);
 	return 0;
 }
 
 void desindex_page(void *page) {
-	printf_ft("desindex_page :");
-	printf_ft("nb_page : %d -> desindex\n", arena_g.page_nb);
+	printf_ft("unalocating %p\n", page);
 	suppress_page_out_off_global_arr(page);
 	arena_g.page_nb--;
 }

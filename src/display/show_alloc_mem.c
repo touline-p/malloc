@@ -6,7 +6,7 @@
 #include <stddef.h>
 
 static void _print_chunk_info_t(chunk_info_t *chunk);
-static void _show_page_mem(page_info_t ptr);
+void _show_page_mem(page_info_t ptr);
 
 
 void show_alloc_mem() {
@@ -19,7 +19,7 @@ void show_alloc_mem() {
 	}
 }
 
-static void _show_page_mem(page_info_t ptr) {
+void show_page_mem(page_info_t ptr) {
 	size_t index = 0;
 	printf_ft("page : %p -- ", ptr.ptr);
 	printf_ft("len %d\n", ptr.length);

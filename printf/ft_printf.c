@@ -48,7 +48,6 @@ int	sub_printf_ft(int fd, const char *format, va_list params) {
 int printf_ft(const char *format, ...) {
 	va_list params;
 
-	write(1, "$", 1);
 	va_start(params, format);
 	return sub_printf_ft(1, format, params);
 }
