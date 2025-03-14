@@ -1,11 +1,12 @@
-
+#include "define.h"
 #include "malloc.h"
-#include "printf_ft.h"
 #include "stddef.h"
 #include "sys/mman.h"
 #include "zone_management.h"
+#include "maskmanipulation.h"
 #include "page.h"
 #include <unistd.h>
+#include "macro.h"
 
 
 void *large_allocator(size_t size)
@@ -16,17 +17,18 @@ void *large_allocator(size_t size)
 	void *zone_ptr;
 
 	page_size = sysconf(_SC_PAGESIZE);
+	size = ROUND(size, page_size);
 	size = (size / page_size) * page_size + ((size % page_size) != 0) * page_size;
 
 	protections = PROT_WRITE | PROT_READ;
 	flags = MAP_PRIVATE | MAP_ANONYMOUS;
 	zone_ptr = mmap(NULL, size, protections, flags, -1, 0);
 	if (MAP_FAILED == zone_ptr) {
-		printf_ft("map failed");
 		return NULL;
 	}
 	setup_zone(zone_ptr, size, 1);
 	index_page(zone_ptr, size);
+	set_mask(zone_ptr, CHUNK_IN_USE, true);
 	return zone_ptr;
 }
 

@@ -3,10 +3,7 @@
 #include "maskmanipulation.h"
 #include "zone_management.h"
 #include "page.h"
-
-
-#include "libft.h"
-
+#include "list.h"
 
 #include <unistd.h>
 #include <sys/mman.h>
@@ -17,7 +14,7 @@ size_t zone_size(size_t chunk_size) {
 	size_t page_size;
 
 	size = chunk_size * 100;
-	page_size = sysconf(_SC_PAGESIZE);
+	page_size = PAGESIZE;
 	size = (size / page_size) * page_size + ((size % page_size) != 0) * page_size;
 	return  size;
 }
@@ -27,6 +24,9 @@ void *zone_allocator(freed_chunk_t **zone_ptr, size_t size_chunk)
 	size_t size;
 	int flags;
 	int protections;
+	freed_chunk_t *artefacts = *zone_ptr;
+	
+	artefacts = *zone_ptr;
 
 	size = zone_size(size_chunk);
 	protections = PROT_WRITE | PROT_READ;
@@ -37,6 +37,10 @@ void *zone_allocator(freed_chunk_t **zone_ptr, size_t size_chunk)
 	}
 	setup_zone(*zone_ptr, size_chunk, size / size_chunk);
 	index_page(*zone_ptr, size);
+
+	if (artefacts) {
+		*zone_ptr = merge_list(artefacts, *zone_ptr);
+	}
 	return SUCCESS;
 }
 

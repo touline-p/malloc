@@ -6,8 +6,8 @@
 
 #define ALLOC_COUNT 10000
 #define REALLOC_COUNT 10
-#define TINY_ALLOC_MAX_SIZE 128
-#define SMALL_ALLOC_MAX_SIZE 1024
+#define TINY_ALLOC_MAX_SIZE 32
+#define SMALL_ALLOC_MAX_SIZE 4080
 #define LARGE_ALLOC_MAX_SIZE 10240
 
 typedef struct {
@@ -60,7 +60,9 @@ int main(void) {
         size_t size = next_alloc_size();
         allocations[i].size = size;
 
+	print("malloc\n");
         char* result = (char*)malloc(size);
+	print("post malloc\n");
         assert(size == 0 || result != NULL, "Memory allocation failed");
 
         allocations[i].seed = rand();

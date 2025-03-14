@@ -27,12 +27,10 @@ void *take_from_tiny_list(void) {
 		
 	ret_val = arena_g.tiny_list;
 	arena_g.tiny_list = ret_val->next;
-	set_mask((chunk_info_t *)ret_val, CHUNK_IN_USE, true);
 	return ret_val;
 }
 
 void tiny_unallocator(freed_chunk_t *header, size_t size) {
-	set_mask((chunk_info_t *)header, CHUNK_IN_USE, false);
 	header->next = arena_g.tiny_list;
 	arena_g.tiny_list = header;
 }

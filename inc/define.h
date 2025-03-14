@@ -1,10 +1,15 @@
 #ifndef DEFINE_H
 # define DEFINE_H
 
+# include <unistd.h>
+# define PAGESIZE sysconf(_SC_PAGESIZE)
+
+
 # define HEADER_LEN 16
-# define TINY_MAX_SIZE 32
+# define TINY_MAX_SIZE 2 * HEADER_LEN
 # define TINY_MAX_LEN TINY_MAX_SIZE - HEADER_LEN
-# define MEDIUM_MAX_SIZE 4096
+# define MEDIUM_MIN_SIZE TINY_MAX_SIZE + HEADER_LEN
+# define MEDIUM_MAX_SIZE PAGESIZE
 # define MEDIUM_MAX_LEN MEDIUM_MAX_SIZE - HEADER_LEN
 
 enum mask_e {

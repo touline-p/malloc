@@ -24,7 +24,7 @@ message(${ALL_SOURCES})
 
 add_library(${LIB_MALLOC} SHARED ${ALL_SOURCES})
 target_include_directories(${LIB_MALLOC} PUBLIC ${INC})
-target_compile_options(${LIB_MALLOC} PRIVATE -o0)
+target_compile_options(${LIB_MALLOC} PRIVATE -o0 -lpthread)
 
 #---------------------------------------------------------------------------------------#
 

@@ -1,8 +1,10 @@
-#include <dlfcn.h>
-#include <unistd.h>
+#include "libft.h"
 #include "malloc.h"
+#include "printf_ft.h"
 
-int main() {
-	char * addr = malloc(25);
-	free(addr);
+int main(int ac, char **av) {
+	int *addr = malloc(56);
+	printf_ft("bonjour a vous tous\n");
+	bzero_ft(addr, 56);
+	return 3;
 }

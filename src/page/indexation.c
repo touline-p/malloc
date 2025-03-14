@@ -31,7 +31,6 @@ int index_page(void *page, size_t size) {
 }
 
 void desindex_page(void *page) {
-	printf_ft("unalocating %p\n", page);
 	suppress_page_out_off_global_arr(page);
 	arena_g.page_nb--;
 }
